@@ -93,6 +93,9 @@ func _process(delta):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED) # (O CONFINED si usas Top-Down)
 # --- MODELO 3D ---
 # Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
+# --- MODELO 3D ---
+# Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
+
 const WALK_THIGH := 0.5     # Balanceo de cadera (pasos)
 const WALK_KNEE := 0.9      # Flexión de rodilla al levantar el pie
 const WALK_ARM := 0.3       # Balanceo de brazos
@@ -123,6 +126,9 @@ var walk_blend := 0.0
 var _meshes: Array[MeshInstance3D] = []
 var _swing_axis := {}
 
+# --- TUTORIAL: acciones bloqueadas (el tutorial las desbloquea de a poco) ---
+var locked_actions := {}
+
 func _ready():
 	# Tu código anterior (health, etc...)
 	add_to_group("player")
@@ -135,7 +141,7 @@ func _ready():
 	_setup_skeleton()
 
 func _unhandled_input(_event):
-	if Input.is_action_just_pressed("shoot"):
+	if Input.is_action_just_pressed("shoot") and not is_action_locked("shoot"):
 		if aim_pivot.has_node("Weapon"):
 			var weapon = aim_pivot.get_node("Weapon")
 
@@ -155,7 +161,7 @@ func _physics_process(delta):
 		velocity.y -= gravity * delta
 
 	# --- NUEVO: Lógica de Salto ---
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	if Input.is_action_just_pressed("jump") and is_on_floor() and not is_action_locked("jump"):
 		velocity.y = JUMP_VELOCITY
 
 	# Cooldown del roll
@@ -166,7 +172,7 @@ func _physics_process(delta):
 		melee_cooldown_timer -= delta
 
 	# Iniciar roll
-	if Input.is_action_just_pressed("roll") and can_roll():
+	if Input.is_action_just_pressed("roll") and can_roll() and not is_action_locked("roll"):
 		_start_roll()
 
 	if is_rolling:
@@ -187,7 +193,8 @@ func _physics_process(delta):
 			velocity.x = move_toward(velocity.x, 0, SPEED)
 			velocity.z = move_toward(velocity.z, 0, SPEED)
 
-	_handle_weapon_input(delta)
+	if not is_action_locked("drop"):
+		_handle_weapon_input(delta)
 	_aim_at_mouse()
 	_animate_model(delta)
 	move_and_slide()
@@ -521,3 +528,6 @@ func _move_basis() -> Basis:
 	if _is_free_look():
 		return Basis(Vector3.UP, camera.global_rotation.y)
 	return Basis.IDENTITY
+
+func is_action_locked(action: String) -> bool:
+	return locked_actions.get(action, false)
