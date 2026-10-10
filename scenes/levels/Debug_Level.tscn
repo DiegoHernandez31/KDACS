@@ -5,22 +5,37 @@
 [ext_resource type="PackedScene" uid="uid://bbef8js0k1xdy" path="res://scenes/characters/Jhon_Pick.tscn" id="1_5nid0"]
 [ext_resource type="AudioStream" uid="uid://cx23nbj36xvgb" path="res://assets/audios/Dog_Extermination.ogg" id="1_e4ye6"]
 [ext_resource type="Script" uid="uid://cwabelvb5p20r" path="res://scripts/components/LevelManager.gd" id="1_s2s0q"]
-[ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="1_x5ymp"]
 [ext_resource type="Script" uid="uid://cxk2l8ybxpi6e" path="res://scripts/components/audio_stream_player.gd" id="2_3hn1f"]
 [ext_resource type="PackedScene" uid="uid://c108b11oonfmc" path="res://scenes/characters/enemy.tscn" id="2_d33xg"]
 [ext_resource type="PackedScene" uid="uid://5l2e6uhvj1um" path="res://scenes/misc/enemy_spawner.tscn" id="2_e7fa1"]
 [ext_resource type="Script" uid="uid://b1rr3fuefppff" path="res://scripts/components/cameraPlayer.gd" id="3_ckyui"]
+[ext_resource type="PackedScene" uid="uid://dkjljbidkg6md" path="res://papa_calle_completo/papa_calle.glb" id="9_rne6o"]
+[ext_resource type="Texture2D" uid="uid://tip2fdxsqh" path="res://images/sky.jpeg" id="10_s66yy"]
 [ext_resource type="Script" uid="uid://cq2anjkcaq2y6" path="res://scripts/components/canvas_layer.gd" id="11_ol47b"]
 [ext_resource type="Texture2D" uid="uid://ro1uiy8t25ua" path="res://assets/sprites/Cursor.png" id="12_rne6o"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_5nid0"]
-size = Vector3(16.937805, 1.1748047, 11.358612)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_7j1ar"]
+panorama = ExtResource("10_s66yy")
+energy_multiplier = 0.0
+
+[sub_resource type="Sky" id="Sky_66kr8"]
+sky_material = SubResource("PanoramaSkyMaterial_7j1ar")
+
+[sub_resource type="Environment" id="Environment_rne6o"]
+sky = SubResource("Sky_66kr8")
+ambient_light_source = 3
+ambient_light_energy = 0.0
+reflected_light_source = 2
+tonemap_exposure = 0.13
+glow_enabled = true
+glow_intensity = 0.56
+fog_enabled = true
 
 [node name="Node3D" type="Node3D" unique_id=992782541]
 script = ExtResource("1_s2s0q")
 
 [node name="EnemySpawner" parent="." unique_id=464815162 instance=ExtResource("2_e7fa1")]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, -0.04760647, 1.0390615, -9.495671)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, -0.17806318, -0.9730287, -9.496)
 enemy_scene = ExtResource("2_d33xg")
 
 [node name="BeatTimer" parent="." unique_id=1302528446 instance=ExtResource("1_4a5fo")]
@@ -43,25 +58,25 @@ stream = ExtResource("1_e4ye6")
 script = ExtResource("2_3hn1f")
 
 [node name="Player" parent="." unique_id=2133185571 instance=ExtResource("1_5nid0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7054877, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18614149, 0.24519777, 0.00043815374)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=48323474]
 transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1951347192]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.037078857, 0, -3.22435)
-shape = SubResource("BoxShape3D_5nid0")
+[node name="papa_calle" parent="StaticBody3D" unique_id=853673538 instance=ExtResource("9_rne6o")]
+transform = Transform3D(0.9794184, 0, 0, 0, 0.9794184, 0, 0, 0, 0.9794184, 0.013208866, -4.7683716e-07, 0.005004406)
 
 [node name="Sprite3D" type="Sprite3D" parent="StaticBody3D" unique_id=845248228]
 transform = Transform3D(12.8, 0, 0, 0, -4.159139e-07, 1, 0, -9.515, -4.371139e-08, 0, 0, -3.62)
 render_priority = -1
-texture = ExtResource("1_x5ymp")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="StaticBody3D" unique_id=1268195181]
+environment = SubResource("Environment_rne6o")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=952598562 node_paths=PackedStringArray("target")]
-transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 7.8738747, 4.5980306)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 7.8738747, 7.053848)
 script = ExtResource("3_ckyui")
 target = NodePath("../Player")
-offset = Vector3(0, 3.5, 5)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1209614068]
 script = ExtResource("11_ol47b")

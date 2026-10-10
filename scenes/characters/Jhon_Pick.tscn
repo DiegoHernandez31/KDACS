@@ -3,16 +3,19 @@
 [ext_resource type="Script" uid="uid://b47s442qqdhdd" path="res://scripts/components/player.gd" id="1_ptpx7"]
 [ext_resource type="PackedScene" uid="uid://bfhqqs8bhvpkg" path="res://resources/models/JhonPick.glb" id="3_6cg6r"]
 [ext_resource type="PackedScene" uid="uid://djwy8wpddvjp5" path="res://scenes/misc/weapon.tscn" id="3_7rpi8"]
+[ext_resource type="PackedScene" uid="uid://chai8yeo6e5vr" path="res://scenes/ui/game_over.tscn" id="4_uv8k1"]
+[ext_resource type="Texture2D" uid="uid://coxk6hyokpofn" path="res://images/gameOver.jpeg" id="5_gxxth"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_un3et"]
-height = 1.6435547
+radius = 0.47644043
+height = 1.0853271
 
 [node name="CharacterBody3D" type="CharacterBody3D" unique_id=2133185571 groups=["player"]]
 collision_layer = 2
 script = ExtResource("1_ptpx7")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=57734452]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32177734, 0)
+transform = Transform3D(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.32177734, 0)
 shape = SubResource("CapsuleShape3D_un3et")
 
 [node name="AimPivot" type="Node3D" parent="." unique_id=2043554571]
@@ -28,3 +31,44 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28591418, 0)
 transform = Transform3D(0.8660254, 0.40957603, -0.28678823, 0, 0.57357645, 0.81915206, 0.5, -0.7094065, 0.49673176, 0, 0, 0)
 light_energy = 7.0
 shadow_enabled = true
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1566210158]
+layer = 10
+
+[node name="game_over" parent="CanvasLayer" unique_id=860791862 instance=ExtResource("4_uv8k1")]
+script = null
+
+[node name="ColorRect2" type="ColorRect" parent="CanvasLayer/game_over" unique_id=1313556051]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect2" type="TextureRect" parent="CanvasLayer/game_over" unique_id=2116136892]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_gxxth")
+expand_mode = 1
+
+[node name="goToMenu2" type="TextureButton" parent="CanvasLayer/game_over" unique_id=1911865748]
+layout_mode = 0
+offset_left = 584.5858
+offset_top = 397.3216
+offset_right = 894.1911
+offset_bottom = 471.8978
+
+[node name="retry2" type="TextureButton" parent="CanvasLayer/game_over" unique_id=1457888863]
+layout_mode = 0
+offset_left = 583.2271
+offset_top = 483.0359
+offset_right = 903.37384
+offset_bottom = 562.2972
+
+[connection signal="pressed" from="CanvasLayer/game_over/goToMenu2" to="." method="_on_go_to_menu_2_pressed"]
+[connection signal="pressed" from="CanvasLayer/game_over/retry2" to="." method="_on_retry_2_pressed"]
