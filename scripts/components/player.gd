@@ -31,7 +31,7 @@ var weapon_hold_active := false
 const MELEE_RANGE := 1.4        # A qué distancia del jugador está el centro del golpe
 const MELEE_RADIUS := 0.9       # Tamaño del área de golpe
 const MELEE_DAMAGE := 1.0
-const MELEE_COOLDOWN := 0.4
+const MELEE_COOLDOWN := 0.15
 
 var melee_cooldown_timer := 0.0
 const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
@@ -264,3 +264,12 @@ func _melee_attack() -> void:
 	var tween = create_tween()
 	tween.tween_property(sprite, "scale", escala, 0.05)
 	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
+
+func recibir_dano(cantidad: float) -> void:
+	if is_invulnerable:
+		return
+	RhythmManager.perder_energia(cantidad)
+
+	# Feedback: flash rojo
+	sprite.modulate = Color(1.6, 0.4, 0.4)
+	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.2)

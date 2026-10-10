@@ -10,6 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://c108b11oonfmc" path="res://scenes/characters/enemy.tscn" id="2_d33xg"]
 [ext_resource type="PackedScene" uid="uid://5l2e6uhvj1um" path="res://scenes/misc/enemy_spawner.tscn" id="2_e7fa1"]
 [ext_resource type="Script" uid="uid://b1rr3fuefppff" path="res://scripts/components/cameraPlayer.gd" id="3_ckyui"]
+[ext_resource type="Script" uid="uid://cq2anjkcaq2y6" path="res://scripts/components/canvas_layer.gd" id="11_ol47b"]
+[ext_resource type="Texture2D" uid="uid://ro1uiy8t25ua" path="res://assets/sprites/Cursor.png" id="12_rne6o"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5nid0"]
 size = Vector3(16.937805, 1.1748047, 11.358612)
@@ -59,3 +61,11 @@ texture = ExtResource("1_x5ymp")
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 7.8738747, 4.5980306)
 script = ExtResource("3_ckyui")
 target = NodePath("../Player")
+offset = Vector3(0, 3.5, 5)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1209614068]
+script = ExtResource("11_ol47b")
+escala_base = 0.75
+
+[node name="Crosshair" type="Sprite2D" parent="CanvasLayer" unique_id=346478852]
+texture = ExtResource("12_rne6o")

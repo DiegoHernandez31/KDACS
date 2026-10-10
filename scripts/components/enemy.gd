@@ -8,7 +8,7 @@ signal died
 @export var acceleration: float = 12.0
 @export var detection_range: float = 8.0   # Distancia a la que nota al jugador
 @export var lose_range: float = 12.0       # Distancia a la que lo pierde (mayor que la de detección)
-@export var attack_damage: int = 10
+@export var attack_damage: float = 10.0
 @export var attack_speed: float = 1.0
 
 var current_health: float
@@ -34,6 +34,10 @@ func _physics_process(delta):
 		velocity.y -= gravity * delta
 
 	_update_detection()
+	if attack_timer > 0.0:
+		attack_timer -= delta
+	if player_in_range != null and attack_timer <= 0.0:
+		_attack()
 
 	# Velocidad objetivo: perseguir si lo detectó y aún no está en rango de ataque
 	var target_vel := Vector3.ZERO
@@ -66,6 +70,7 @@ func take_damage(amount: float):
 	if is_dead:
 		return
 	current_health -= amount
+	_flash_hit()
 	if current_health <= 0:
 		die()
 
@@ -84,3 +89,12 @@ func _on_attack_area_body_entered(body: Node3D) -> void:
 func _on_attack_area_body_exited(body: Node3D) -> void:
 	if body.is_in_group("player"):
 		player_in_range = null
+
+func _attack() -> void:
+	attack_timer = attack_speed
+	if is_instance_valid(player_in_range) and player_in_range.has_method("recibir_dano"):
+		player_in_range.recibir_dano(attack_damage)
+
+func _flash_hit() -> void:
+	sprite.modulate = Color(1.8, 0.5, 0.5)
+	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.15)
