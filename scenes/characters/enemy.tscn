@@ -1,0 +1,31 @@
+[gd_scene format=3 uid="uid://c108b11oonfmc"]
+
+[ext_resource type="Script" uid="uid://bo3bq0eeaw85s" path="res://scripts/components/enemy.gd" id="1_fulqv"]
+[ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="2_f2e6v"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_d33xg"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_s2s0q"]
+radius = 0.43896484
+height = 1.8083496
+
+[node name="Enemy" type="CharacterBody3D" unique_id=141590176]
+script = ExtResource("1_fulqv")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=378649060]
+shape = SubResource("CapsuleShape3D_d33xg")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=632087859]
+transform = Transform3D(1, 0, 0, 0, 1.48, 0, 0, 0, 1, 0, 0, 0)
+texture = ExtResource("2_f2e6v")
+
+[node name="AttackArea" type="Area3D" parent="." unique_id=745331196]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea" unique_id=242482294]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.095825195, 0)
+shape = SubResource("CapsuleShape3D_s2s0q")
+
+[connection signal="body_entered" from="AttackArea" to="." method="_on_attack_area_body_entered"]
+[connection signal="body_exited" from="AttackArea" to="." method="_on_attack_area_body_exited"]
