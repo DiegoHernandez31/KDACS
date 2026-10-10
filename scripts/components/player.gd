@@ -579,18 +579,32 @@ func recibir_dano(cantidad: float) -> void:
 func die() -> void:
 	if is_dead:
 		return
+
 	is_dead = true
 	is_rolling = false
+	is_invulnerable = true
 	velocity = Vector3.ZERO
 
-	# Desactivar la colisión para que los enemigos te ignoren
-	# (is_dead detiene la física, así el cuerpo no cae por el piso)
+	# Desactivar la colisión del jugador
 	if has_node("CollisionShape3D"):
 		$CollisionShape3D.set_deferred("disabled", true)
 
-	game_over_ui.visible = true
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)   # Para poder hacer clic en los botones
+	# Crear la explosión en la posición del jugador
+	ExplosionFX.spawn(
+		get_tree().current_scene,
+		global_position + Vector3(0.0, 0.6, 0.0),
+		1.0,
+		ExplosionFX.Style.PLAYER,
+		true
+	)
 
+	# Ocultar el modelo después de generar la explosión
+	visual.visible = false
+	aim_pivot.visible = false
+
+	# Mostrar Game Over
+	game_over_ui.visible = true
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 # Los nombres de estas dos funciones corresponden a los nodos de tus botones
 func _on_go_to_menu_2_pressed() -> void:

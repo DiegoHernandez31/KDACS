@@ -351,7 +351,6 @@ func _setup_flash() -> void:
 	for node in model.find_children("*", "MeshInstance3D", true, false):
 		(node as MeshInstance3D).material_overlay = _flash_mat
 
-
 func _flash_hit() -> void:
 	if _flash_tween:
 		_flash_tween.kill()

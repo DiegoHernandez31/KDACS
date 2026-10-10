@@ -1,21 +1,20 @@
-class_name DollHolder
 extends Node
 
-const DOLL_PATH := "res://resources/models/PapsuneMiku.glb"
-const SOUND_PATH := "res://resources/sounds/Mikudayo.wav"
+const DOLL_PATH := "res://resources/models/Papsune_Miku.glb"
+const SOUND_PATH := "res://ruta/a/Mikudayo.wav"    # pon la ruta real de tu audio
 
 @export var doll_scene: PackedScene
 @export var sound: AudioStream
-@export var hand_bone_name: String = "hand.L"        # la mano contraria al arma
+@export var hand_bone_name: String = "hand.L"      # la mano contraria al arma
 @export var held_offset := Vector3(0, 0.1, 0)
-@export var held_rotation := Vector3(0, 0, 180)
+@export var held_rotation := Vector3(0, 90, 180)
 @export var held_scale: float = 0.6
 @export var action_name: String = "squeak_doll"
-@export var default_key: Key = KEY_M                  # tecla por defecto
+@export var default_key: Key = KEY_M
 
 var has_doll := false
 var _doll: Node3D
-var _audio: AudioStreamPlayer3D
+var _audio: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -62,10 +61,10 @@ func equip() -> bool:
 	_doll.rotation_degrees = held_rotation
 	_doll.scale = Vector3.ONE * held_scale
 
-	_audio = AudioStreamPlayer3D.new()
+	_audio = AudioStreamPlayer.new()
 	_audio.stream = sound
-	_audio.max_polyphony = 3
-	_doll.add_child(_audio)
+	_audio.max_polyphony = 1                        # el audio no se encima
+	add_child(_audio)
 
 	has_doll = true
 	return true

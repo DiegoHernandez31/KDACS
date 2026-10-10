@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b1fcw8qv5lp6f"]
+
+[ext_resource type="Script" uid="uid://5wh5e6ecib5g" path="res://scripts/components/EasterEgg/doll_pickup.gd" id="1_2nyht"]
+
+[node name="DollPickUp" type="Area3D" unique_id=2049213150]
+script = ExtResource("1_2nyht")
