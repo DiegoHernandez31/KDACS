@@ -408,28 +408,14 @@ func _melee_attack() -> void:
 
 	var escala := Vector3(1.25, 0.9, 1.0) if en_beat else Vector3(1.08, 0.97, 1.0)
 	var tween = create_tween()
-<<<<<<< HEAD
 	tween.tween_property(model, "scale", model_base_scale * escala, 0.05)
 	tween.tween_property(model, "scale", model_base_scale, 0.1)
-<<<<<<< HEAD
-=======
-	tween.tween_property(sprite, "scale", escala, 0.05)
-	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
-=======
->>>>>>> CharacterModels
 
 func recibir_dano(cantidad: float) -> void:
 	if is_invulnerable:
 		return
 	RhythmManager.perder_energia(cantidad)
 
-<<<<<<< HEAD
-	# Feedback: flash rojo
-	sprite.modulate = Color(1.6, 0.4, 0.4)
-	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.2)
->>>>>>> bbcc409a64dac97464d1be53c852023fb44ee6de
-=======
 	# Parpadeo de transparencia para feedback 3D
 	var tween = create_tween()
 	tween.tween_method(_set_model_alpha, 0.3, 1.0, 0.2)
->>>>>>> CharacterModels
