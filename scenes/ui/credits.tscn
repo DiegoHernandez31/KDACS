@@ -1,0 +1,127 @@
+[gd_scene format=3 uid="uid://bfn3xsr5kym05"]
+
+[ext_resource type="Texture2D" uid="uid://oixkjlrt32l0" path="res://images/Options.jpeg" id="1_0fbet"]
+[ext_resource type="Script" uid="uid://dr4lj1qty44e" path="res://scenes/ui/scripts/credits.gd" id="1_jkvjv"]
+
+[node name="Control" type="Control" unique_id=377670166]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_jkvjv")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1780293146]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=1480292458]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("1_0fbet")
+expand_mode = 1
+
+[node name="Content" type="VBoxContainer" parent="TextureRect" unique_id=593268818]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.235
+anchor_top = 0.105
+anchor_right = 0.765
+anchor_bottom = 0.85
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="Eyebrow" type="Label" parent="TextureRect/Content" unique_id=425378686]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.029999971, 0.14316678, 1)
+theme_override_colors/font_shadow_color = Color(0.95, 0.95, 0.95, 0)
+theme_override_font_sizes/font_size = 31
+text = "Rythm potato  •  GAME JAM 24H"
+horizontal_alignment = 1
+
+[node name="Title" type="Label" parent="TextureRect/Content" unique_id=960385513]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9666667, 1, 0, 1)
+theme_override_font_sizes/font_size = 49
+text = "✦ CRÉDITOS ✦"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="TextureRect/Content" unique_id=737039856]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.050000012, 0.4458332, 1)
+theme_override_font_sizes/font_size = 21
+text = "PAPA CALIENTE"
+horizontal_alignment = 1
+
+[node name="Tagline" type="Label" parent="TextureRect/Content" unique_id=1656236339]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.929412, 0.960784, 1, 1)
+theme_override_font_sizes/font_size = 19
+text = "Una papa, mil perros, un solo ritmo."
+horizontal_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="TextureRect/Content" unique_id=923031926]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+color = Color(0, 0.74902, 1, 1)
+
+[node name="TeamTitle" type="Label" parent="TextureRect/Content" unique_id=304322058]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.815686, 0.184314, 1)
+theme_override_font_sizes/font_size = 19
+text = "EQUIPO DE DESARROLLO"
+horizontal_alignment = 1
+
+[node name="Team" type="Label" parent="TextureRect/Content" unique_id=575337829]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.929412, 0.960784, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "Andres Felipe Rojas
+Karol Dayana Aristizabal
+Juan Camilo Florez
+Diego Hernandez
+Samuel Rodriguez"
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Divider2" type="ColorRect" parent="TextureRect/Content" unique_id=1417233177]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(1, 0.207843, 0.678431, 1)
+
+[node name="Thanks" type="Label" parent="TextureRect/Content" unique_id=841126288]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.929412, 0.960784, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "Gracias por jugar y apoyar la revolución de las papas."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Disclaimer" type="Label" parent="TextureRect/Content" unique_id=1104372315]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9302301, 0.97, 0.1746, 1)
+theme_override_font_sizes/font_size = 22
+text = "Creado con creatividad, código y una pizca de calor."
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="." unique_id=558122047]
+layout_mode = 0
+offset_left = 38.0
+offset_top = 21.0
+offset_right = 186.0
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 26
+text = "Return"
+
+[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
