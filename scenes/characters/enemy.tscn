@@ -22,7 +22,7 @@ collision_layer = 0
 collision_mask = 2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea" unique_id=242482294]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.095825195, 0)
+transform = Transform3D(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -0.095825195, 0)
 shape = SubResource("CapsuleShape3D_s2s0q")
 
 [connection signal="body_entered" from="AttackArea" to="." method="_on_attack_area_body_entered"]

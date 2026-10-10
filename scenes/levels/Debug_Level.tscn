@@ -13,9 +13,6 @@
 [ext_resource type="Script" uid="uid://cq2anjkcaq2y6" path="res://scripts/components/canvas_layer.gd" id="11_ol47b"]
 [ext_resource type="Texture2D" uid="uid://ro1uiy8t25ua" path="res://assets/sprites/Cursor.png" id="12_rne6o"]
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_5nid0"]
-size = Vector3(16.937805, 1.1748047, 11.358612)
-
 [sub_resource type="Environment" id="Environment_rne6o"]
 ambient_light_color = Color(0.7, 0.7, 0.7, 1)
 ambient_light_energy = 2.55
@@ -24,7 +21,7 @@ ambient_light_energy = 2.55
 script = ExtResource("1_s2s0q")
 
 [node name="EnemySpawner" parent="." unique_id=464815162 instance=ExtResource("2_e7fa1")]
-transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, -0.04760647, 1.0390615, -9.495671)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, -0.17806318, -0.9730287, -9.496)
 enemy_scene = ExtResource("2_d33xg")
 
 [node name="BeatTimer" parent="." unique_id=1302528446 instance=ExtResource("1_4a5fo")]
@@ -47,16 +44,13 @@ stream = ExtResource("1_e4ye6")
 script = ExtResource("2_3hn1f")
 
 [node name="Player" parent="." unique_id=2133185571 instance=ExtResource("1_5nid0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7054877, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18614149, 0.24519777, 0.00043815374)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=48323474]
 transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="papa_calle" parent="StaticBody3D" unique_id=853673538 instance=ExtResource("9_rne6o")]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1951347192]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.037078857, 0, -3.22435)
-shape = SubResource("BoxShape3D_5nid0")
+transform = Transform3D(0.9794184, 0, 0, 0, 0.9794184, 0, 0, 0, 0.9794184, 0.013208866, -4.7683716e-07, 0.005004406)
 
 [node name="Sprite3D" type="Sprite3D" parent="StaticBody3D" unique_id=845248228]
 transform = Transform3D(12.8, 0, 0, 0, -4.159139e-07, 1, 0, -9.515, -4.371139e-08, 0, 0, -3.62)
