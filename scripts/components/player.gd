@@ -1,7 +1,8 @@
 extends CharacterBody3D
 
 @onready var camera = get_viewport().get_camera_3d()
-@onready var sprite = $Sprite3D
+@onready var visual: Node3D = $Visual
+@onready var model: Node3D = $Visual/Model
 @onready var aim_pivot = $AimPivot
 
 const SPEED = 5.0
@@ -36,8 +37,18 @@ const MELEE_COOLDOWN := 0.4
 var melee_cooldown_timer := 0.0
 const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
 
+# --- MODELO 3D ---
+var model_base_scale := Vector3.ONE
+var model_base_pos := Vector3.ZERO
+var walk_time := 0.0
+var _meshes: Array[MeshInstance3D] = []
+
 func _ready() -> void:
 	add_to_group("player")
+	model_base_scale = model.scale
+	model_base_pos = model.position
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		_meshes.append(n)
 
 func _physics_process(delta):
 	# Gravedad
@@ -75,6 +86,7 @@ func _physics_process(delta):
 
 	_handle_weapon_input(delta)
 	_aim_at_mouse()
+	_animate_model(delta)
 	move_and_slide()
 
 func _aim_at_mouse():
@@ -86,21 +98,37 @@ func _aim_at_mouse():
 	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
 	
 	if intersection != null:
-		# Usamos aim_pivot.global_position.y en lugar de global_position.y para el target
-		# Esto asegura que el pivot siempre mire en un plano perfectamente horizontal (solo rota en el eje Y)
+		# El pivot siempre mira en un plano horizontal (solo rota en el eje Y)
 		var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
 		
-		# Validamos respecto a la posición del pivot, no del root
 		if not aim_pivot.global_position.is_equal_approx(look_target):
 			aim_pivot.look_at(look_target, Vector3.UP)
-			sprite.look_at(look_target, Vector3.UP)
-			
-			# NOTA: Eliminamos sprite.look_at(). Si usas Billboard, esto causa "backflips".
-			# El código flip_h a continuación es suficiente para que el personaje "mire" izquierda/derecha.
-			if intersection.x < global_position.x:
-				sprite.flip_h = true  # Mira a la izquierda
-			else:
-				sprite.flip_h = false # Mira a la derecha
+
+		# El modelo mira hacia el mouse. Su frente es +Z, por eso atan2(x, z).
+		var dir = intersection - global_position
+		dir.y = 0.0
+		if dir.length_squared() > 0.001:
+			visual.global_rotation.y = atan2(dir.x, dir.z)
+
+# --- ANIMACIÓN PROCEDURAL (el modelo no trae clips de animación) ---
+
+func _animate_model(delta: float) -> void:
+	if is_rolling:
+		return
+	var speed := Vector2(velocity.x, velocity.z).length()
+	if speed > 0.1 and is_on_floor():
+		walk_time += delta * speed * 2.2
+		model.position.y = model_base_pos.y + absf(sin(walk_time)) * 0.06  # saltito al caminar
+		model.rotation.z = sin(walk_time) * 0.08                          # balanceo lateral
+	else:
+		walk_time = 0.0
+		model.position.y = lerpf(model.position.y, model_base_pos.y, 10.0 * delta)
+		model.rotation.z = lerp_angle(model.rotation.z, 0.0, 10.0 * delta)
+
+func _set_model_alpha(a: float) -> void:
+	for m in _meshes:
+		m.transparency = 1.0 - a
+
 # --- ROLL ---
 
 func can_roll() -> bool:
@@ -125,17 +153,19 @@ func _start_roll():
 	if RhythmManager.es_en_beat():
 		RhythmManager.ganar_energia(ROLL_ENERGY_BONUS)
 
-	# Feedback visual: sprite semitransparente y "aplastado" mientras rueda
+	# Feedback visual: modelo semitransparente y "aplastado" mientras rueda
+	model.position = model_base_pos
+	model.rotation.z = 0.0
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(sprite, "modulate:a", 0.5, 0.05)
-	tween.tween_property(sprite, "scale", Vector3(1.2, 0.7, 1.0), 0.05)
+	tween.tween_method(_set_model_alpha, 1.0, 0.5, 0.05)
+	tween.tween_property(model, "scale", model_base_scale * Vector3(1.2, 0.7, 1.0), 0.05)
 
 func _end_roll():
 	is_rolling = false
 	is_invulnerable = false
 	var tween = create_tween().set_parallel(true)
-	tween.tween_property(sprite, "modulate:a", 1.0, 0.1)
-	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
+	tween.tween_method(_set_model_alpha, 0.5, 1.0, 0.1)
+	tween.tween_property(model, "scale", model_base_scale, 0.1)
 	
 func _unhandled_input(_event):
 	if Input.is_action_just_pressed("shoot"):
@@ -262,5 +292,5 @@ func _melee_attack() -> void:
 	# Feedback visual: el golpe en beat se ve más fuerte
 	var escala := Vector3(1.25, 0.9, 1.0) if en_beat else Vector3(1.08, 0.97, 1.0)
 	var tween = create_tween()
-	tween.tween_property(sprite, "scale", escala, 0.05)
-	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
+	tween.tween_property(model, "scale", model_base_scale * escala, 0.05)
+	tween.tween_property(model, "scale", model_base_scale, 0.1)
