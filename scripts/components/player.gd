@@ -60,17 +60,19 @@ func _ready():
 
 # 3. Añadimos esta nueva función para detectar los movimientos del mouse
 func _unhandled_input(event):
-  if Input.is_action_just_pressed("shoot"):
-      if aim_pivot.has_node("Weapon"):
-        var weapon = aim_pivot.get_node("Weapon")
+	if Input.is_action_just_pressed("shoot"):
+		if aim_pivot.has_node("Weapon"):
+			var weapon = aim_pivot.get_node("Weapon")
 
-        if not RhythmManager.es_en_beat():
-          RhythmManager.registrar_fallo() 
+			if not RhythmManager.es_en_beat():
+				RhythmManager.registrar_fallo()
+				_on_shoot_pose()
+				return
 
-        _on_shoot_pose()
-        weapon.shoot()
-      else:
-        _melee_attack()
+			weapon.shoot()
+			_on_shoot_pose()
+		else:
+			_melee_attack()
 	# Verificamos que el juego no esté pausado (por si el jugador murió)
 	if not is_dead and event is InputEventMouseMotion:
 		
