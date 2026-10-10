@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://dcgil1ev11tgp"]
+
+[ext_resource type="Script" uid="uid://bt658w7b30gsg" path="res://scenes/ui/scripts/menu.gd" id="1_wedc3"]
+[ext_resource type="Texture2D" uid="uid://ds7jo8chc5w86" path="res://images/PantallaInicio.png" id="2_wedc3"]
+
+[node name="menu" type="Control" unique_id=454439773]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wedc3")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=357358555]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=593265340]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_wedc3")
+expand_mode = 1
+
+[node name="play" type="TextureButton" parent="." unique_id=605297523]
+layout_mode = 0
+offset_left = 513.0
+offset_top = 323.0
+offset_right = 751.0
+offset_bottom = 406.0
+
+[node name="exit" type="TextureButton" parent="." unique_id=886974188]
+layout_mode = 0
+offset_left = 515.0
+offset_top = 421.0
+offset_right = 777.0
+offset_bottom = 503.0
+
+[node name="credits" type="TextureButton" parent="." unique_id=2089877315]
+layout_mode = 0
+offset_left = 510.0
+offset_top = 512.0
+offset_right = 755.0
+offset_bottom = 589.0
+
+[connection signal="pressed" from="play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="exit" to="." method="_on_exit_pressed"]
+[connection signal="pressed" from="credits" to="." method="_on_credits_pressed"]
