@@ -6,10 +6,23 @@ extends CharacterBody3D
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
+var health: int = 100
+
+func take_damage(amount: int):
+	
+	if is_dead:
+		return
+	health -= amount
+	print("Jugador recibió daño. Vida restante: ", health)
+	if health <= 0:
+		print("El jugador ha muerto.")
+		die()
+		# Aquí luego puedes reiniciar el nivel o mostrar pantalla de Game Over
 
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _physics_process(delta):
+	
 	# Aplicar gravedad
 	if not is_on_floor():
 		velocity.y -= gravity * delta
@@ -66,3 +79,18 @@ func _unhandled_input(_event):
 			var weapon = aim_pivot.get_node("Weapon")
 			weapon.shoot()
 			
+			
+var is_dead: bool = false # Esta es nuestra barrera de seguridad
+
+func die():
+	is_dead = true # Activamos la bandera para no recibir más daño
+	print("El jugador ha muerto. Reiniciando de forma segura...")
+	
+	# 2. (Opcional pero recomendado) Desactivamos la colisión del jugador 
+	# para que el enemigo lo suelte. Asegúrate de que el nombre del nodo coincida.
+	if has_node("CollisionShape3D"):
+		$CollisionShape3D.set_deferred("disabled", true)
+	
+	# 3. Reiniciamos el nivel limpiamente
+	# IMPORTANTE: Asegúrate de borrar cualquier get_tree().paused = true que tuvieras antes
+	get_tree().reload_current_scene()
