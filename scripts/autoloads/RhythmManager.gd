@@ -4,7 +4,7 @@ extends Node
 var bpm: float = 140.0
 var sec_por_beat: float
 var posicion_cancion: float = 0.0
-var tolerancia: float = 0.125 # Ventana de tiempo (en segundos) para acertar el beat
+var tolerancia: float = 0.155 # Ventana de tiempo (en segundos) para acertar el beat
 
 # --- CONFIGURACIÓN DE ENERGÍA ---
 var energia_maxima: float = 100.0
@@ -43,7 +43,7 @@ func registrar_exito():
 	# Eliminamos el chequeo de es_en_beat() aquí adentro. 
 	# El ritmo ya se evaluó en el momento exacto en que el jugador hizo CLIC para disparar.
 	# Si la bala llegó hasta aquí y golpeó, es un acierto puro.
-	energia_actual = min(energia_actual + 10.0, energia_maxima) 
+	energia_actual = min(energia_actual + 15.0, energia_maxima) 
 	print("¡EXCELENTE! Diste en el blanco.")
 	
 func ganar_energia(rollEnergyBonus):
@@ -60,7 +60,7 @@ func perder_energia(cantidad: float):
 
 # Se llama cuando el jugador dispara fuera de ritmo o golpea una pared
 func registrar_fallo(motivo: String = "desconocido"):
-	energia_actual -= 10.0
+	energia_actual -= 8.0
 	print("¡FALLASTE! motivo: ", motivo)
 	if energia_actual <= 0:
 		_game_over()
