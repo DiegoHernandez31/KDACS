@@ -22,9 +22,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28591418, 0)
 
 [node name="Visual" type="Node3D" parent="." unique_id=2015847059]
 
-[node name="Model" parent="Visual" unique_id=2108482808 instance=ExtResource("3_6cg6r")]
+[node name="Model" parent="Visual" unique_id=484934853 instance=ExtResource("3_6cg6r")]
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=167590002]
 transform = Transform3D(0.8660254, 0.40957603, -0.28678823, 0, 0.57357645, 0.81915206, 0.5, -0.7094065, 0.49673176, 0, 0, 0)
-light_energy = 3.0
+light_energy = 7.0
 shadow_enabled = true
