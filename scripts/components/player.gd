@@ -3,6 +3,7 @@ extends CharacterBody3D
 # ============================================================
 #  NODOS Y EXPORTS
 # ============================================================
+@onready var camera = get_viewport().get_camera_3d()
 @onready var visual: Node3D = $Visual
 @onready var model: Node3D = $Visual/Model
 @onready var skeleton: Skeleton3D = model.find_child("Skeleton3D", true, false) as Skeleton3D
@@ -11,8 +12,7 @@ extends CharacterBody3D
 @onready var head: Node3D = get_node_or_null("Head")   # Opcional: solo se usa con body_mouse_look
 
 @export var health: int = 100   # Sin uso aquí: la vida real es RhythmManager.energia_actual
-@export var mouse_sensitivity: float = 0.003
-@export var body_mouse_look: bool = false   # Modo antiguo: el mouse gira el cuerpo y la cabeza
+
 
 # ============================================================
 #  CONSTANTES
@@ -100,7 +100,7 @@ var locked_actions := {}
 # ============================================================
 func _ready() -> void:
 	add_to_group("player")
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
 	model_base_scale = model.scale
 	model_base_pos = model.position
 	for n in model.find_children("*", "MeshInstance3D", true, false):
@@ -112,34 +112,21 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if is_dead:
 		return
-	# Alterna entre mouse capturado y visible
-	if Input.is_action_just_pressed("toggle_camera"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+
+func _unhandled_input(_event):
+	if Input.is_action_just_pressed("shoot") and not is_action_locked("shoot"):
+		if aim_pivot.has_node("Weapon"):
+			var weapon = aim_pivot.get_node("Weapon")
+
+			if not RhythmManager.es_en_beat():
+				RhythmManager.registrar_fallo()
+				_on_shoot_pose()
+				return
+
+			_on_shoot_pose()                       # 1) Brazo arriba al instante
+			weapon.shoot(_get_aim_direction())     # 2) La bala sale hacia donde apuntas
 		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	# Tecla K: matar al jugador (solo en builds de depuración)
-	if OS.is_debug_build() and event is InputEventKey:
-		var key := event as InputEventKey
-		if key.pressed and not key.echo and key.keycode == KEY_K:
-			die()
-			return
-
-	if is_dead:
-		return
-
-	if event.is_action_pressed("shoot") and not event.is_echo():
-		if not is_action_locked("shoot"):
-			_try_shoot()
-	elif body_mouse_look and head != null and event is InputEventMouseMotion:
-		var motion := event as InputEventMouseMotion
-		rotate_y(-motion.relative.x * mouse_sensitivity)
-		head.rotate_x(-motion.relative.y * mouse_sensitivity)
-		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
-
+			_melee_attack()
 
 func _try_shoot() -> void:
 	var weapon = _get_weapon()
