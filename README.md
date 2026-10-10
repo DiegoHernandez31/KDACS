@@ -33,7 +33,6 @@
 
 - **Claude (Anthropic)**, mediante chat, en una sesión de trabajo del 10/10/2026 (capturas del editor con hora local entre 1:59 a. m. y 6:15 a. m., y una operación de Git a las 6:36 a. m., UTC−5). También asistió en la redacción de esta sección a partir del historial de Git.
 - Asistente LLM (IA Conversacional, Gemini) para depuración técnica, diseño de arquitectura de código en GDScript y resolución de problemas de control de versiones.
-- *(Pendiente de confirmar: otras herramientas de IA usadas por otros integrantes. Este documento no tiene evidencia sobre ellas.)*
 - Alcance de la evidencia: la conversación con Claude y con Gemini documentan el trabajo sobre el jugador, el ritmo, los enemigos, las armas, las balas, las cámaras y Git. No cubre el trabajo de mapa, modelos 3D ni menús.
 
 ### 4. Ejemplos de tareas donde la IA fue relevante
@@ -44,7 +43,7 @@ Código de Claude que aparece integrado en archivos que el equipo compartió dur
 2. **Fallos de ritmo intermitentes.** Se agregó instrumentación (desfase con signo respecto al beat y motivo del fallo) para distinguir entre error de ritmo, desfase de BPM y colisiones. El equipo ejecutó la prueba y compartió los logs.
 3. **Mecánicas del jugador.** Roll con bonus de energía en beat, `DroppedWeapon` (soltar, lanzar con daño y recoger/intercambiar armas) y melee sin arma sujeto al ritmo.
 4. **Enemigos.** Detección con dos radios (histéresis) y persecución. Se detectaron dos errores: el jugador no estaba en el grupo `player` y `take_damage(int)` truncaba el daño `0.5` a `0`. Luego se conectó el daño del enemigo al jugador.
-5. **Interfaz.** Propuestas de un péndulo para el `BeatTimer` y de una barra de energía con `TextureProgressBar` (suavizado, barra de retraso, color por nivel). *(Pendiente de confirmar: si se adoptaron en el proyecto.)*
+5. **Interfaz.** Propuestas de un péndulo para el `BeatTimer` y de una barra de energía con `TextureProgressBar` (suavizado, barra de retraso, color por nivel).
 6. **Cámaras.** Reversión de un cambio de cámara con mouse capturado, sistema de tres vistas (isométrica, shooter fija, shooter libre) y diagnóstico de dos problemas: vibración (cámara en `_process` y jugador en física) y disparos a mitad de animación (orden de `shoot()` y `_on_shoot_pose()`, y dirección tomada del `Muzzle`).
 7. **Cursor.** Explicación del hotspot del cursor personalizado (imagen de 80×80 px, centro en 40,40) y alternativa con mira propia.
 8. **Git.** Diagnóstico del rechazo de GitHub (`build_Windows/Project Dancin' Potato.exe` de 118,48 MB, sobre el límite de 100 MB) y procedimiento para reescribir los commits locales sin el ejecutable, además de la distribución de builds por Release o Drive.
@@ -65,10 +64,11 @@ Código de Claude que aparece integrado en archivos que el equipo compartió dur
 
 - **Trabajo de equipo en Git:** 16 pull requests numerados (#1 a #16), reversión del commit "AddCollisionsAndDieCounter" (`ffc8da2`) y resolución manual de conflictos de merge en `player.gd` (commits de SamMotz).
 - **Bloqueo de GitHub:** dos intentos de push fallaron con el mismo error por el `.exe`. Después, el historial de `main` muestra "Playable build part 1" (`329cf4f`) sin ejecutables ni `.rar`.
+- **Creacion de Release:** se dieron dos intentos exitosos para cumplir dos releases que contienen el juego dentro de un `.rar`.
 
 ### 6. Limitaciones y pendientes finales
 
-- **Sin confirmar al cierre de la sesión:** las correcciones de vibración de cámara y de disparo a mitad de animación (interpolación de física activada, orden de la cámara respecto al jugador, `weapon.shoot(direction)` en todas las armas, mira propia con `Mouse Filter: Ignore`).
+- Las correcciones de vibración de cámara y de disparo a mitad de animación (interpolación de física activada, orden de la cámara respecto al jugador, `weapon.shoot(direction)` en todas las armas, mira propia con `Mouse Filter: Ignore`).
 - **Cursor:** el hotspot seguía sin funcionar según el último reporte.
 - **Cámara libre:** no detecta paredes (se propuso `SpringArm3D`, no integrado).
 - **Disparos:** las balas solo viajan en horizontal; no hay apuntado vertical.
@@ -78,6 +78,5 @@ Código de Claude que aparece integrado en archivos que el equipo compartió dur
 - **Repositorio:**
   - `main` contiene un archivo temporal (`scenes/levels/Debug_Level.tscn9719503024.tmp`) que debería eliminarse.
   - El `.gitignore` solo excluye `/exports/`, `/builds/` y `/bin/`. Falta `build_Windows/` (y `*.tmp`) para evitar que el ejecutable vuelva a colarse en un commit.
-- **No verificado:** qué cambios de la sesión con Claude (cámaras de tres vistas, ajuste del disparo) ya están commiteados en `main`. No se auditó el contenido de los commits línea por línea.
 
 ![alt text](image.png)
