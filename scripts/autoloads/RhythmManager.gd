@@ -106,7 +106,7 @@ func es_en_beat() -> bool:
 	return abs(desfase) <= tolerancia
 
 func _game_over() -> void:
-  if modo_tutorial:
+	if modo_tutorial:
 		energia_actual = energia_maxima
 		energia_agotada.emit()
 		return

@@ -1,181 +1,182 @@
 extends CharacterBody3D
 
-@onready var camera = get_viewport().get_camera_3d()
+# ============================================================
+#  NODOS Y EXPORTS
+# ============================================================
 @onready var visual: Node3D = $Visual
 @onready var model: Node3D = $Visual/Model
-@onready var skeleton: Skeleton3D = model.find_child("Skeleton3D", true, false)
-@onready var aim_pivot = $AimPivot
+@onready var skeleton: Skeleton3D = model.find_child("Skeleton3D", true, false) as Skeleton3D
+@onready var aim_pivot: Node3D = $AimPivot
 @onready var game_over_ui = $CanvasLayer/game_over
-#@onready var anim_player = $AnimationPlayer # (Descomenta esto cuando tengas tu animación)
+@onready var head: Node3D = get_node_or_null("Head")   # Opcional: solo se usa con body_mouse_look
 
-@export var health: int = 100
+@export var health: int = 100   # Sin uso aquí: la vida real es RhythmManager.energia_actual
+@export var mouse_sensitivity: float = 0.003
+@export var body_mouse_look: bool = false   # Modo antiguo: el mouse gira el cuerpo y la cabeza
 
-var is_dead: bool = false # <--- ¡Aquí la definimos!
-const SPEED = 5.0
-const JUMP_VELOCITY = 6.0
+# ============================================================
+#  CONSTANTES
+# ============================================================
+const SPEED := 5.0
+const JUMP_VELOCITY := 6.0
 
 # --- ROLL ---
-const ROLL_SPEED = 11.0
-const ROLL_DURATION = 0.35      # Cuánto dura el roll (y la invulnerabilidad)
-const ROLL_COOLDOWN = 0.8       # Espera entre rolls
-const ROLL_ENERGY_BONUS = 9.0   # Energía ganada si lo haces en beat
+const ROLL_SPEED := 11.0
+const ROLL_DURATION := 0.35      # Cuánto dura el roll (y la invulnerabilidad)
+const ROLL_COOLDOWN := 0.8       # Espera entre rolls
+const ROLL_ENERGY_BONUS := 9.0   # Energía ganada si lo haces en beat
 
+# --- ARMAS ---
+const PICKUP_RANGE := 1.8
+const THROW_HOLD_TIME := 0.25    # Segundos de mantener la tecla para que sea lanzamiento
+const THROW_SPEED := 16.0
+
+# --- MELEE ---
+const MELEE_RANGE := 1.4         # A qué distancia del jugador está el centro del golpe
+const MELEE_RADIUS := 0.9        # Tamaño del área de golpe
+const MELEE_DAMAGE := 1.0
+const MELEE_COOLDOWN := 0.15
+const MELEE_OFFBEAT_MULT := 0.0  # Multiplicador de daño fuera de ritmo (0 = no hace daño)
+
+# --- ANIMACIÓN: CAMINATA (radianes) ---
+const WALK_THIGH := 0.5          # Balanceo de cadera (pasos)
+const WALK_KNEE := 0.9           # Flexión de rodilla al levantar el pie
+const WALK_ARM := 0.3            # Balanceo de brazos
+const WALK_HAND_COUNTER := 0.6   # 0..1: cuánto se contrarresta el giro del brazo en la mano
+
+# --- ANIMACIÓN: BRAZO AL DISPARAR ---
+const SHOOT_ARM_RAISE := -1.4    # Cuánto sube el brazo derecho (negativo = adelante/arriba)
+const SHOOT_ARM_HOLD := 0.45     # Segundos que se queda arriba después del último disparo
+const SHOOT_ARM_SPEED := 14.0    # Qué tan rápido sube/baja (mayor = más brusco)
+const SHOOT_RECOIL := 0.2        # "Latigazo" extra hacia arriba en cada disparo
+const SHOOT_RECOIL_DECAY := 2.5  # Qué tan rápido se disipa el retroceso
+
+# --- ARMA EN LA MANO ---
+const GRIP_OFFSET := Vector3(0.0, 0.2, 0.1)
+const WEAPON_GRIP_NUDGE := Vector3.ZERO
+const WEAPON_LOWERED_PITCH := 70.0
+
+# ============================================================
+#  ESTADO
+# ============================================================
+var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
+var is_dead := false
+
+# Roll
 var is_rolling := false
 var is_invulnerable := false
 var roll_timer := 0.0
 var roll_cooldown_timer := 0.0
 var roll_direction := Vector3.ZERO
 
-var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
-
-const PICKUP_RANGE := 1.8
-const THROW_HOLD_TIME := 0.25   # Segundos de click derecho para que sea lanzamiento
-const THROW_SPEED := 16.0
-
+# Armas
 var weapon_hold_time := 0.0
 var weapon_hold_active := false
 
-# --- MELEE ---
-const MELEE_RANGE := 1.4        # A qué distancia del jugador está el centro del golpe
-const MELEE_RADIUS := 0.9       # Tamaño del área de golpe
-const MELEE_DAMAGE := 1.0
-const MELEE_COOLDOWN := 0.15
-
+# Melee
 var melee_cooldown_timer := 0.0
-const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
 
-# 1. Añade estas variables al principio de tu script
-@export var mouse_sensitivity: float = 0.003
-@onready var head = $Head # Asegúrate de que este nombre coincida con el nodo que creaste
-
-func _ready():
-	# Tu código anterior (health, etc...)
-	add_to_group("player")
-	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
-	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-	model_base_scale = model.scale
-	model_base_pos = model.position
-	for n in model.find_children("*", "MeshInstance3D", true, false):
-		_meshes.append(n)
-	_setup_skeleton()
-
-# 3. Añadimos esta nueva función para detectar los movimientos del mouse
-func _unhandled_input(event):
-	if Input.is_action_just_pressed("shoot"):
-		if aim_pivot.has_node("Weapon"):
-			var weapon = aim_pivot.get_node("Weapon")
-
-			if not RhythmManager.es_en_beat():
-				RhythmManager.registrar_fallo()
-				_on_shoot_pose()
-				return
-
-			weapon.shoot()
-			_on_shoot_pose()
-		else:
-			_melee_attack()
-	# Verificamos que el juego no esté pausado (por si el jugador murió)
-	if not is_dead and event is InputEventMouseMotion:
-		
-		# Gira TODO EL CUERPO de izquierda a derecha (Eje Y)
-		rotate_y(-event.relative.x * mouse_sensitivity)
-		
-		# Gira SOLO LA CABEZA de arriba a abajo (Eje X)
-		head.rotate_x(-event.relative.y * mouse_sensitivity)
-		
-		# Limitamos la cabeza para no dar vueltas de 360 grados (mirar al techo/piso)
-		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-80), deg_to_rad(80))
-
-func _process(delta):
-	# Si presionas Shift, alterna el estado del mouse
-	if Input.is_action_just_pressed("toggle_camera"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED: # (O CONFINED si usas Top-Down)
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED) # (O CONFINED si usas Top-Down)
-# --- MODELO 3D ---
-# Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
-# --- MODELO 3D ---
-# Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
-
-const WALK_THIGH := 0.5     # Balanceo de cadera (pasos)
-const WALK_KNEE := 0.9      # Flexión de rodilla al levantar el pie
-const WALK_ARM := 0.3       # Balanceo de brazos
-const WALK_HAND_COUNTER := 0.6  # 0..1: cuánto se contrarresta el giro del brazo en la mano
-
-	# --- BRAZO AL DISPARAR ---
-const SHOOT_ARM_RAISE := -1.4   # Cuánto sube el brazo derecho (negativo = hacia adelante/arriba)
-const SHOOT_ARM_HOLD := 0.45    # Segundos que se queda arriba después del último disparo
-const SHOOT_ARM_SPEED := 14.0   # Qué tan rápido sube/baja (mayor = más brusco)
-const SHOOT_RECOIL := 0.2       # Pequeño "latigazo" extra hacia arriba en cada disparo
-const SHOOT_RECOIL_DECAY := 2.5 # Qué tan rápido se disipa el retroceso
-
-	# --- ARMA EN LA MANO ---
-const GRIP_OFFSET := Vector3(0.0, 0.2, 0.1)
-const WEAPON_GRIP_NUDGE := Vector3.ZERO
-const WEAPON_LOWERED_PITCH := 70.0
-var _hand_idx := -1
-var _arm_r_angle := 0.0   # Ángulo actual del brazo derecho (lo escribe _animate_model)
-
-var shoot_arm_timer := 0.0
-var shoot_arm_blend := 0.0
-var shoot_recoil := 0.0
-
+# Modelo y animación
 var model_base_scale := Vector3.ONE
 var model_base_pos := Vector3.ZERO
 var walk_time := 0.0
 var walk_blend := 0.0
+var shoot_arm_timer := 0.0
+var shoot_arm_blend := 0.0
+var shoot_recoil := 0.0
+var _arm_r_angle := 0.0   # Ángulo actual del brazo derecho (lo escribe _animate_model)
+var _hand_idx := -1
 var _meshes: Array[MeshInstance3D] = []
 var _swing_axis := {}
+var _alpha_tween: Tween
+var _scale_tween: Tween
 
-# --- TUTORIAL: acciones bloqueadas (el tutorial las desbloquea de a poco) ---
+# Tutorial: acciones bloqueadas (el tutorial las desbloquea de a poco)
 var locked_actions := {}
 
-func _ready():
-	print("PLAYER READY, game_over_ui = ", game_over_ui)
-	# Tu código anterior (health, etc...)
+
+# ============================================================
+#  CICLO DE VIDA E INPUT
+# ============================================================
+func _ready() -> void:
 	add_to_group("player")
-	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
-	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	model_base_scale = model.scale
 	model_base_pos = model.position
 	for n in model.find_children("*", "MeshInstance3D", true, false):
-		_meshes.append(n)
+		_meshes.append(n as MeshInstance3D)
 	_setup_skeleton()
 	game_over_ui.visible = false
 
-func _unhandled_input(_event):
-	if Input.is_action_just_pressed("shoot") and not is_action_locked("shoot"):
-		if aim_pivot.has_node("Weapon"):
-			var weapon = aim_pivot.get_node("Weapon")
 
-			if not RhythmManager.es_en_beat():
-				RhythmManager.registrar_fallo()
-				_on_shoot_pose()
-				return
-
-			_on_shoot_pose()                       # 1) Brazo arriba al instante
-			weapon.shoot(_get_aim_direction())     # 2) La bala sale hacia donde apuntas
+func _process(_delta: float) -> void:
+	if is_dead:
+		return
+	# Alterna entre mouse capturado y visible
+	if Input.is_action_just_pressed("toggle_camera"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 		else:
-			_melee_attack()
-			
-func _physics_process(delta):
-	# Gravedad
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Tecla K: matar al jugador (solo en builds de depuración)
+	if OS.is_debug_build() and event is InputEventKey:
+		var key := event as InputEventKey
+		if key.pressed and not key.echo and key.keycode == KEY_K:
+			die()
+			return
+
+	if is_dead:
+		return
+
+	if event.is_action_pressed("shoot") and not event.is_echo():
+		if not is_action_locked("shoot"):
+			_try_shoot()
+	elif body_mouse_look and head != null and event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		rotate_y(-motion.relative.x * mouse_sensitivity)
+		head.rotate_x(-motion.relative.y * mouse_sensitivity)
+		head.rotation.x = clampf(head.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
+
+
+func _try_shoot() -> void:
+	var weapon = _get_weapon()
+	if weapon == null:
+		_melee_attack()
+		return
+
+	if not RhythmManager.es_en_beat():
+		RhythmManager.registrar_fallo()
+		_on_shoot_pose()
+		return
+
+	_on_shoot_pose()   # 1) Brazo arriba al instante
+	if weapon.has_method("shoot"):
+		weapon.shoot(_get_aim_direction())   # 2) La bala sale hacia donde apuntas
+
+
+func is_action_locked(action: String) -> bool:
+	return locked_actions.get(action, false)
+
+
+# ============================================================
+#  MOVIMIENTO
+# ============================================================
+func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
+
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	# --- NUEVO: Lógica de Salto ---
 	if Input.is_action_just_pressed("jump") and is_on_floor() and not is_action_locked("jump"):
 		velocity.y = JUMP_VELOCITY
 
-	# Cooldown del roll
-	if roll_cooldown_timer > 0.0:
-		roll_cooldown_timer -= delta
-	
-	if melee_cooldown_timer > 0.0:
-		melee_cooldown_timer -= delta
+	roll_cooldown_timer = maxf(0.0, roll_cooldown_timer - delta)
+	melee_cooldown_timer = maxf(0.0, melee_cooldown_timer - delta)
 
-	# Iniciar roll
 	if Input.is_action_just_pressed("roll") and can_roll() and not is_action_locked("roll"):
 		_start_roll()
 
@@ -187,24 +188,49 @@ func _physics_process(delta):
 		if roll_timer <= 0.0:
 			_end_roll()
 	else:
-		var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		var direction = (_move_basis() * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+		var direction := (_move_basis() * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
-		if direction:
+		if direction != Vector3.ZERO:
 			velocity.x = direction.x * SPEED
 			velocity.z = direction.z * SPEED
 		else:
-			velocity.x = move_toward(velocity.x, 0, SPEED)
-			velocity.z = move_toward(velocity.z, 0, SPEED)
+			velocity.x = move_toward(velocity.x, 0.0, SPEED)
+			velocity.z = move_toward(velocity.z, 0.0, SPEED)
 
 	if not is_action_locked("drop"):
 		_handle_weapon_input(delta)
 	_aim_at_mouse()
 	_animate_model(delta)
 	move_and_slide()
-	_update_weapon_to_hand()  # Después de mover al personaje, para que no vaya un frame atrás
+	_update_weapon_to_hand()   # Después de mover al personaje, para que no vaya un frame atrás
 
-func _aim_at_mouse():
+
+func _cam() -> Camera3D:
+	return get_viewport().get_camera_3d()
+
+
+func _is_free_look() -> bool:
+	var cam := _cam()
+	return cam != null and cam.get("free_look") == true
+
+
+# En la vista 3, "adelante" es hacia donde mira la cámara; en las otras, ejes del mundo
+func _move_basis() -> Basis:
+	var cam := _cam()
+	if cam != null and _is_free_look():
+		return Basis(Vector3.UP, cam.global_rotation.y)
+	return Basis.IDENTITY
+
+
+# ============================================================
+#  APUNTADO
+# ============================================================
+func _aim_at_mouse() -> void:
+	var cam := _cam()
+	if cam == null:
+		return
+
 	var free_look := _is_free_look()
 	var mouse_pos: Vector2
 	if free_look:
@@ -212,12 +238,12 @@ func _aim_at_mouse():
 	else:
 		mouse_pos = get_viewport().get_mouse_position()
 
-	var ray_origin = camera.project_ray_origin(mouse_pos)
-	var ray_direction = camera.project_ray_normal(mouse_pos)
+	var ray_origin := cam.project_ray_origin(mouse_pos)
+	var ray_direction := cam.project_ray_normal(mouse_pos)
 
 	# Plano a la altura del arma, que es la altura a la que viaja la bala
-	var floor_plane = Plane(Vector3.UP, aim_pivot.global_position.y)
-	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
+	var aim_plane := Plane(Vector3.UP, aim_pivot.global_position.y)
+	var intersection = aim_plane.intersects_ray(ray_origin, ray_direction)
 
 	if intersection == null:
 		# Rayo por encima del horizonte: usamos solo su dirección horizontal
@@ -226,11 +252,11 @@ func _aim_at_mouse():
 			return
 		intersection = global_position + flat.normalized() * 20.0
 
-	var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
+	var look_target := Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
 
 	if free_look:
 		# El personaje mira hacia donde mira la cámara: siempre le ves la espalda
-		var cam_fwd: Vector3 = -camera.global_transform.basis.z
+		var cam_fwd: Vector3 = -cam.global_transform.basis.z
 		cam_fwd.y = 0.0
 		cam_fwd = cam_fwd.normalized()
 		visual.global_rotation.y = atan2(cam_fwd.x, cam_fwd.z)
@@ -238,16 +264,25 @@ func _aim_at_mouse():
 		if aim_pivot.global_position.distance_to(look_target) < 2.5:
 			look_target = aim_pivot.global_position + cam_fwd * 5.0
 	else:
-		var dir = intersection - global_position
+		var dir: Vector3 = intersection - global_position
 		dir.y = 0.0
 		if dir.length_squared() > 0.001:
 			visual.global_rotation.y = atan2(dir.x, dir.z)
 
 	if not aim_pivot.global_position.is_equal_approx(look_target):
 		aim_pivot.look_at(look_target, Vector3.UP)
-		
-# --- ANIMACIÓN PROCEDURAL ---
 
+
+# Dirección horizontal hacia donde apunta el jugador (no depende de la animación)
+func _get_aim_direction() -> Vector3:
+	var dir := -aim_pivot.global_transform.basis.z
+	dir.y = 0.0
+	return dir.normalized()
+
+
+# ============================================================
+#  ANIMACIÓN PROCEDURAL
+# ============================================================
 func _setup_skeleton() -> void:
 	if skeleton == null:
 		push_warning("No se encontró Skeleton3D")
@@ -266,11 +301,13 @@ func _setup_skeleton() -> void:
 		}
 	_hand_idx = skeleton.find_bone("hand.R")
 
+
 func _swing(n: String, angle: float) -> void:
 	if not _swing_axis.has(n):
 		return
 	var d = _swing_axis[n]
 	skeleton.set_bone_pose_rotation(d.idx, d.rest_q * Quaternion(d.axis, angle))
+
 
 func _animate_model(delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
@@ -289,7 +326,7 @@ func _animate_model(delta: float) -> void:
 	_swing("shin.R", maxf(0.0,  c) * WALK_KNEE * walk_blend)
 
 	var arm_l := -s * WALK_ARM * walk_blend
-	var arm_r_walk :=  s * WALK_ARM * walk_blend
+	var arm_r_walk := s * WALK_ARM * walk_blend
 
 	shoot_arm_timer = maxf(0.0, shoot_arm_timer - delta)
 	var raise_target := 1.0 if (shoot_arm_timer > 0.0 and not is_rolling) else 0.0
@@ -310,6 +347,15 @@ func _animate_model(delta: float) -> void:
 		model.position.y = lerpf(model.position.y, model_base_pos.y, 10.0 * delta)
 		model.rotation.z = lerp_angle(model.rotation.z, 0.0, 10.0 * delta)
 
+
+func _on_shoot_pose() -> void:
+	shoot_arm_timer = SHOOT_ARM_HOLD
+	shoot_recoil = SHOOT_RECOIL
+	shoot_arm_blend = 1.0     # Brazo arriba ya, así el arma nunca está a medio subir al disparar
+	_animate_model(0.0)       # Aplica la pose a los huesos en este mismo instante
+	_update_weapon_to_hand()
+
+
 func _update_weapon_to_hand() -> void:
 	var w := _get_weapon()
 	if w == null or skeleton == null or _hand_idx == -1:
@@ -327,6 +373,7 @@ func _update_weapon_to_hand() -> void:
 	var grip_world: Vector3 = hand_xf * GRIP_OFFSET
 	var grip_local := _weapon_grip_point(w) + WEAPON_GRIP_NUDGE
 	w.global_position = grip_world - w.global_basis * grip_local
+
 
 func _weapon_grip_point(w: Node3D) -> Vector3:
 	if w.has_meta("grip_point"):
@@ -352,35 +399,43 @@ func _weapon_grip_point(w: Node3D) -> Vector3:
 	w.set_meta("grip_point", point)
 	return point
 
-# Dirección horizontal hacia donde apunta el jugador (no depende de la animación)
-func _get_aim_direction() -> Vector3:
-	var dir = -aim_pivot.global_transform.basis.z
-	dir.y = 0.0
-	return dir.normalized()
 
-func _on_shoot_pose() -> void:
-	shoot_arm_timer = SHOOT_ARM_HOLD
-	shoot_recoil = SHOOT_RECOIL
-	shoot_arm_blend = 1.0     # Brazo arriba ya, así el arma nunca está a medio subir al disparar
-	_animate_model(0.0)       # Aplica la pose a los huesos en este mismo instante
-	_update_weapon_to_hand()
-
+# ============================================================
+#  EFECTOS VISUALES (un solo tween por propiedad, para que no se pisen)
+# ============================================================
 func _set_model_alpha(a: float) -> void:
 	for m in _meshes:
 		m.transparency = 1.0 - a
 
-# --- ROLL ---
 
+func _tween_alpha(from: float, to: float, time: float) -> void:
+	if _alpha_tween:
+		_alpha_tween.kill()
+	_alpha_tween = create_tween()
+	_alpha_tween.tween_method(_set_model_alpha, from, to, time)
+
+
+func _tween_scale(target: Vector3, time: float, then_back := false) -> void:
+	if _scale_tween:
+		_scale_tween.kill()
+	_scale_tween = create_tween()
+	_scale_tween.tween_property(model, "scale", target, time)
+	if then_back:
+		_scale_tween.tween_property(model, "scale", model_base_scale, 0.1)
+
+
+# ============================================================
+#  ROLL
+# ============================================================
 func can_roll() -> bool:
 	return not is_rolling and roll_cooldown_timer <= 0.0 and is_on_floor()
 
-func _start_roll():
-	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	var dir = (_move_basis() * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+
+func _start_roll() -> void:
+	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	var dir := (_move_basis() * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 	if dir == Vector3.ZERO:
-		dir = -aim_pivot.global_transform.basis.z
-		dir.y = 0
-		dir = dir.normalized()
+		dir = _get_aim_direction()
 	roll_direction = dir
 
 	is_rolling = true
@@ -393,27 +448,29 @@ func _start_roll():
 
 	model.position = model_base_pos
 	model.rotation.z = 0.0
-	var tween = create_tween().set_parallel(true)
-	tween.tween_method(_set_model_alpha, 1.0, 0.5, 0.05)
-	tween.tween_property(model, "scale", model_base_scale * Vector3(1.2, 0.7, 1.0), 0.05)
+	_tween_alpha(1.0, 0.5, 0.05)
+	_tween_scale(model_base_scale * Vector3(1.2, 0.7, 1.0), 0.05)
 
-func _end_roll():
+
+func _end_roll() -> void:
 	is_rolling = false
 	is_invulnerable = false
-	var tween = create_tween().set_parallel(true)
-	tween.tween_method(_set_model_alpha, 0.5, 1.0, 0.1)
-	tween.tween_property(model, "scale", model_base_scale, 0.1)
+	_tween_alpha(0.5, 1.0, 0.1)
+	_tween_scale(model_base_scale, 0.1)
 
-# --- SOLTAR / LANZAR / RECOGER ---
 
+# ============================================================
+#  SOLTAR / LANZAR / RECOGER ARMAS
+# ============================================================
 func _get_weapon() -> Node3D:
 	return aim_pivot.get_node_or_null("Weapon") as Node3D
+
 
 func _handle_weapon_input(delta: float) -> void:
 	if Input.is_action_just_pressed("drop_weapon"):
 		var nearby := _find_nearby_weapon()
 		if nearby:
-			_pickup(nearby)
+			_pickup(nearby)   # Si ya tienes arma, se intercambia al instante
 			weapon_hold_active = false
 		elif _get_weapon():
 			weapon_hold_active = true
@@ -423,11 +480,9 @@ func _handle_weapon_input(delta: float) -> void:
 		if Input.is_action_pressed("drop_weapon"):
 			weapon_hold_time += delta
 		if Input.is_action_just_released("drop_weapon"):
-			if weapon_hold_time >= THROW_HOLD_TIME:
-				_detach_weapon(true)
-			else:
-				_detach_weapon(false)
+			_detach_weapon(weapon_hold_time >= THROW_HOLD_TIME)
 			weapon_hold_active = false
+
 
 func _find_nearby_weapon() -> DroppedWeapon:
 	var closest: DroppedWeapon = null
@@ -442,6 +497,8 @@ func _find_nearby_weapon() -> DroppedWeapon:
 			closest = dw
 	return closest
 
+
+# Saca el arma de la mano y la deja en el mundo (suelta o lanzada)
 func _detach_weapon(throw: bool) -> void:
 	var w := _get_weapon()
 	if w == null:
@@ -449,12 +506,10 @@ func _detach_weapon(throw: bool) -> void:
 
 	if w.has_meta("hold_basis"):
 		w.basis = w.get_meta("hold_basis")
-	w.set_meta("hold_transform", w.transform)
+	w.set_meta("hold_transform", w.transform)   # Para devolverla igual al recogerla
 	aim_pivot.remove_child(w)
 
-	var dir = -aim_pivot.global_transform.basis.z
-	dir.y = 0.0
-	dir = dir.normalized()
+	var dir := _get_aim_direction()
 
 	var dropped := DroppedWeapon.new()
 	get_tree().current_scene.add_child(dropped)
@@ -466,11 +521,13 @@ func _detach_weapon(throw: bool) -> void:
 	else:
 		dropped.linear_velocity = dir * 1.0 + Vector3.UP * 1.5
 
+
 func _pickup(dw: DroppedWeapon) -> void:
+	# Si ya tienes arma, la suelta primero (intercambio inmediato)
 	if _get_weapon():
 		_detach_weapon(false)
 
-	var w := dw.weapon
+	var w: Node3D = dw.weapon
 	dw.remove_child(w)
 	dw.queue_free()
 
@@ -478,19 +535,21 @@ func _pickup(dw: DroppedWeapon) -> void:
 	w.name = "Weapon"
 	w.transform = w.get_meta("hold_transform", Transform3D.IDENTITY)
 
+
+# ============================================================
+#  MELEE
+# ============================================================
 func _melee_attack() -> void:
 	if is_rolling or melee_cooldown_timer > 0.0:
 		return
 	melee_cooldown_timer = MELEE_COOLDOWN
 
+	# El ritmo se evalúa UNA vez, en el instante del clic
 	var en_beat: bool = RhythmManager.es_en_beat()
 	if not en_beat:
 		RhythmManager.registrar_fallo("melee fuera de ritmo")
 
-	var dir = -aim_pivot.global_transform.basis.z
-	dir.y = 0.0
-	dir = dir.normalized()
-	var center = aim_pivot.global_position + dir * MELEE_RANGE
+	var center := aim_pivot.global_position + _get_aim_direction() * MELEE_RANGE
 
 	var shape := SphereShape3D.new()
 	shape.radius = MELEE_RADIUS
@@ -506,72 +565,50 @@ func _melee_attack() -> void:
 		var hits := get_world_3d().direct_space_state.intersect_shape(query, 8)
 		for h in hits:
 			var body = h.collider
-			if body.has_method("take_damage"):
+			if body != null and body.has_method("take_damage"):
 				body.take_damage(damage)
-				RhythmManager.registrar_exito()
+				RhythmManager.registrar_exito()   # Acierto: recupera energía, como la bala
 
+	# Feedback visual: el golpe en beat se ve más fuerte
 	var escala := Vector3(1.25, 0.9, 1.0) if en_beat else Vector3(1.08, 0.97, 1.0)
-	var tween = create_tween()
-	tween.tween_property(model, "scale", model_base_scale * escala, 0.05)
-	tween.tween_property(model, "scale", model_base_scale, 0.1)
+	_tween_scale(model_base_scale * escala, 0.05, true)
 
+
+# ============================================================
+#  DAÑO Y MUERTE
+# ============================================================
 func recibir_dano(cantidad: float) -> void:
-	if is_invulnerable:
+	if is_dead or is_invulnerable:
 		return
 	RhythmManager.perder_energia(cantidad)
-	if RhythmManager.energia_actual<= 0:
+	if RhythmManager.energia_actual <= 0:
 		die()
 		return
 
-	# Parpadeo de transparencia para feedback 3D
-	var tween = create_tween()
-	tween.tween_method(_set_model_alpha, 0.3, 1.0, 0.2)
+	# Parpadeo de transparencia como feedback
+	_tween_alpha(0.3, 1.0, 0.2)
 
-func _is_free_look() -> bool:
-	return camera != null and camera.get("free_look") == true
 
-# En la vista 3, "adelante" es hacia donde mira la cámara; en las otras, ejes del mundo
-func _move_basis() -> Basis:
-	if _is_free_look():
-		return Basis(Vector3.UP, camera.global_rotation.y)
-	return Basis.IDENTITY
-	
-func die():
-	print("die() llamado")
+func die() -> void:
 	if is_dead:
 		return
-		
 	is_dead = true
-	print("El jugador ha muerto.")
-	
-	# 1. Preparar/Reproducir la animación
-	# anim_player.play("animacion_de_muerte")
-	
-	# 2. Desactivar colisión para que los enemigos te ignoren
+	is_rolling = false
+	velocity = Vector3.ZERO
+
+	# Desactivar la colisión para que los enemigos te ignoren
+	# (is_dead detiene la física, así el cuerpo no cae por el piso)
 	if has_node("CollisionShape3D"):
 		$CollisionShape3D.set_deferred("disabled", true)
-		
-	# 3. Mostrar el menú de Game Over
+
 	game_over_ui.visible = true
-	
-	# 4. Liberar el mouse para poder hacer clic en los botones
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-	
-	print("game_over_ui: ", game_over_ui, " visible: ", game_over_ui.visible, " size: ", game_over_ui.size if game_over_ui is Control else "n/a")
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)   # Para poder hacer clic en los botones
 
 
+# Los nombres de estas dos funciones corresponden a los nodos de tus botones
 func _on_go_to_menu_2_pressed() -> void:
-	# Reinicia la escena actual
-	get_tree().reload_current_scene()
+	get_tree().change_scene_to_file("res://MainMenu.tscn")   # Verifica que esta ruta exista
 
 
 func _on_retry_2_pressed() -> void:
-	# Cambia a la escena de tu menú principal (Asegúrate de poner la ruta correcta aquí)
-	get_tree().change_scene_to_file("res://MainMenu.tscn")
-
-func _input(event):
-	if event is InputEventKey and event.pressed and event.keycode == KEY_K:
-		die()
-
-func is_action_locked(action: String) -> bool:
-	return locked_actions.get(action, false)
+	get_tree().reload_current_scene()
