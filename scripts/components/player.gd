@@ -9,7 +9,6 @@ extends CharacterBody3D
 @export var health: int = 100
 
 var is_dead: bool = false # <--- ¡Aquí la definimos!
-
 const SPEED = 5.0
 const JUMP_VELOCITY = 6.0
 
@@ -99,14 +98,14 @@ const WALK_KNEE := 0.9      # Flexión de rodilla al levantar el pie
 const WALK_ARM := 0.3       # Balanceo de brazos
 const WALK_HAND_COUNTER := 0.6  # 0..1: cuánto se contrarresta el giro del brazo en la mano
 
-# --- BRAZO AL DISPARAR ---
+	# --- BRAZO AL DISPARAR ---
 const SHOOT_ARM_RAISE := -1.4   # Cuánto sube el brazo derecho (negativo = hacia adelante/arriba)
 const SHOOT_ARM_HOLD := 0.45    # Segundos que se queda arriba después del último disparo
 const SHOOT_ARM_SPEED := 14.0   # Qué tan rápido sube/baja (mayor = más brusco)
 const SHOOT_RECOIL := 0.2       # Pequeño "latigazo" extra hacia arriba en cada disparo
 const SHOOT_RECOIL_DECAY := 2.5 # Qué tan rápido se disipa el retroceso
 
-# --- ARMA EN LA MANO ---
+	# --- ARMA EN LA MANO ---
 const GRIP_OFFSET := Vector3(0.0, 0.2, 0.1)
 const WEAPON_GRIP_NUDGE := Vector3.ZERO
 const WEAPON_LOWERED_PITCH := 70.0
@@ -124,6 +123,32 @@ var walk_blend := 0.0
 var _meshes: Array[MeshInstance3D] = []
 var _swing_axis := {}
 
+func _ready():
+	# Tu código anterior (health, etc...)
+	add_to_group("player")
+	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
+	Input.set_mouse_mode(Input.MOUSE_MODE_CONFINED)
+	model_base_scale = model.scale
+	model_base_pos = model.position
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		_meshes.append(n)
+	_setup_skeleton()
+
+func _unhandled_input(_event):
+	if Input.is_action_just_pressed("shoot"):
+		if aim_pivot.has_node("Weapon"):
+			var weapon = aim_pivot.get_node("Weapon")
+
+			if not RhythmManager.es_en_beat():
+				RhythmManager.registrar_fallo()
+				_on_shoot_pose()
+				return
+
+			_on_shoot_pose()                       # 1) Brazo arriba al instante
+			weapon.shoot(_get_aim_direction())     # 2) La bala sale hacia donde apuntas
+		else:
+			_melee_attack()
+			
 func _physics_process(delta):
 	# Gravedad
 	if not is_on_floor():
@@ -153,7 +178,7 @@ func _physics_process(delta):
 			_end_roll()
 	else:
 		var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-		var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+		var direction = (_move_basis() * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 		if direction:
 			velocity.x = direction.x * SPEED
@@ -169,24 +194,47 @@ func _physics_process(delta):
 	_update_weapon_to_hand()  # Después de mover al personaje, para que no vaya un frame atrás
 
 func _aim_at_mouse():
-	var mouse_pos = get_viewport().get_mouse_position()
+	var free_look := _is_free_look()
+	var mouse_pos: Vector2
+	if free_look:
+		mouse_pos = get_viewport().get_visible_rect().size / 2.0   # La mira está fija en el centro
+	else:
+		mouse_pos = get_viewport().get_mouse_position()
+
 	var ray_origin = camera.project_ray_origin(mouse_pos)
 	var ray_direction = camera.project_ray_normal(mouse_pos)
-	
-	var floor_plane = Plane(Vector3.UP, global_position.y)
-	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
-	
-	if intersection != null:
-		var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
-		
-		if not aim_pivot.global_position.is_equal_approx(look_target):
-			aim_pivot.look_at(look_target, Vector3.UP)
 
+	# Plano a la altura del arma, que es la altura a la que viaja la bala
+	var floor_plane = Plane(Vector3.UP, aim_pivot.global_position.y)
+	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
+
+	if intersection == null:
+		# Rayo por encima del horizonte: usamos solo su dirección horizontal
+		var flat := Vector3(ray_direction.x, 0.0, ray_direction.z)
+		if flat.length_squared() < 0.0001:
+			return
+		intersection = global_position + flat.normalized() * 20.0
+
+	var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
+
+	if free_look:
+		# El personaje mira hacia donde mira la cámara: siempre le ves la espalda
+		var cam_fwd: Vector3 = -camera.global_transform.basis.z
+		cam_fwd.y = 0.0
+		cam_fwd = cam_fwd.normalized()
+		visual.global_rotation.y = atan2(cam_fwd.x, cam_fwd.z)
+		# Si el punto de la mira cae pegado al jugador, apuntamos al frente de la cámara
+		if aim_pivot.global_position.distance_to(look_target) < 2.5:
+			look_target = aim_pivot.global_position + cam_fwd * 5.0
+	else:
 		var dir = intersection - global_position
 		dir.y = 0.0
 		if dir.length_squared() > 0.001:
 			visual.global_rotation.y = atan2(dir.x, dir.z)
 
+	if not aim_pivot.global_position.is_equal_approx(look_target):
+		aim_pivot.look_at(look_target, Vector3.UP)
+		
 # --- ANIMACIÓN PROCEDURAL ---
 
 func _setup_skeleton() -> void:
@@ -293,9 +341,17 @@ func _weapon_grip_point(w: Node3D) -> Vector3:
 	w.set_meta("grip_point", point)
 	return point
 
+# Dirección horizontal hacia donde apunta el jugador (no depende de la animación)
+func _get_aim_direction() -> Vector3:
+	var dir = -aim_pivot.global_transform.basis.z
+	dir.y = 0.0
+	return dir.normalized()
+
 func _on_shoot_pose() -> void:
 	shoot_arm_timer = SHOOT_ARM_HOLD
 	shoot_recoil = SHOOT_RECOIL
+	shoot_arm_blend = 1.0     # Brazo arriba ya, así el arma nunca está a medio subir al disparar
+	_animate_model(0.0)       # Aplica la pose a los huesos en este mismo instante
 	_update_weapon_to_hand()
 
 func _set_model_alpha(a: float) -> void:
@@ -309,7 +365,7 @@ func can_roll() -> bool:
 
 func _start_roll():
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	var dir = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	var dir = (_move_basis() * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if dir == Vector3.ZERO:
 		dir = -aim_pivot.global_transform.basis.z
 		dir.y = 0
@@ -456,3 +512,12 @@ func recibir_dano(cantidad: float) -> void:
 	# Parpadeo de transparencia para feedback 3D
 	var tween = create_tween()
 	tween.tween_method(_set_model_alpha, 0.3, 1.0, 0.2)
+
+func _is_free_look() -> bool:
+	return camera != null and camera.get("free_look") == true
+
+# En la vista 3, "adelante" es hacia donde mira la cámara; en las otras, ejes del mundo
+func _move_basis() -> Basis:
+	if _is_free_look():
+		return Basis(Vector3.UP, camera.global_rotation.y)
+	return Basis.IDENTITY

@@ -15,7 +15,9 @@
 
 [sub_resource type="Environment" id="Environment_rne6o"]
 ambient_light_color = Color(0.7, 0.7, 0.7, 1)
-ambient_light_energy = 2.55
+tonemap_exposure = 0.12
+glow_enabled = true
+fog_enabled = true
 
 [node name="Node3D" type="Node3D" unique_id=992782541]
 script = ExtResource("1_s2s0q")
@@ -60,10 +62,9 @@ render_priority = -1
 environment = SubResource("Environment_rne6o")
 
 [node name="Camera3D" type="Camera3D" parent="." unique_id=952598562 node_paths=PackedStringArray("target")]
-transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 7.8738747, 4.5980306)
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, 0, 7.8738747, 7.053848)
 script = ExtResource("3_ckyui")
 target = NodePath("../Player")
-offset = Vector3(0, 3.5, 5)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1209614068]
 script = ExtResource("11_ol47b")
