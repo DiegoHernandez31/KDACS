@@ -1,13 +1,12 @@
 extends CharacterBody3D
 
 @onready var camera = get_viewport().get_camera_3d()
-@onready var sprite = $Sprite3D # Asegúrate de que el nombre coincida con tu nodo
+@onready var sprite = $Sprite3D
 @onready var aim_pivot = $AimPivot
 
 const SPEED = 5.0
 const JUMP_VELOCITY = 4.5
 
-# Obtiene la gravedad global del proyecto
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
 
 func _physics_process(delta):
@@ -19,7 +18,7 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	# Obtener dirección del input y normalizar a 3D (Z es adelante/atrás)
+	# Obtener dirección del input y normalizar a 3D
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
@@ -30,50 +29,40 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
-	move_and_slide()
-	
-	# Llamamos a la función de apuntado
+	# Llamamos a la función de apuntado antes de mover
 	_aim_at_mouse()
 	
+	# Llamar move_and_slide() solo una vez al final
 	move_and_slide()
 
 func _aim_at_mouse():
-	# 1. Obtener la posición 2D del mouse en la pantalla
 	var mouse_pos = get_viewport().get_mouse_position()
-	
-	# 2. Proyectar un rayo 3D desde la cámara
 	var ray_origin = camera.project_ray_origin(mouse_pos)
 	var ray_direction = camera.project_ray_normal(mouse_pos)
 	
-	# 3. Crear un plano imaginario a la altura exacta del jugador (Eje Y)
 	var floor_plane = Plane(Vector3.UP, global_position.y)
-	
-	# 4. Encontrar el punto 3D exacto donde el rayo choca con el plano
 	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
 	
 	if intersection != null:
-		var look_target = Vector3(intersection.x, global_position.y, intersection.z)
+		# Usamos aim_pivot.global_position.y en lugar de global_position.y para el target
+		# Esto asegura que el pivot siempre mire en un plano perfectamente horizontal (solo rota en el eje Y)
+		var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
 		
-		# Evitar errores si el mouse está exactamente encima del centro del jugador
-		if not global_position.is_equal_approx(look_target):
-			# Rotar el CharacterBody3D para que mire al target
+		# Validamos respecto a la posición del pivot, no del root
+		if not aim_pivot.global_position.is_equal_approx(look_target):
 			aim_pivot.look_at(look_target, Vector3.UP)
 			sprite.look_at(look_target, Vector3.UP)
 			
-			# EXTRA: Como estás usando un Sprite3D con Billboard, el sprite siempre mirará 
-			# a la cámara. Para dar feedback visual, podemos voltear el sprite (flip_h) 
-			# si el mouse está a la izquierda o derecha.
+			# NOTA: Eliminamos sprite.look_at(). Si usas Billboard, esto causa "backflips".
+			# El código flip_h a continuación es suficiente para que el personaje "mire" izquierda/derecha.
 			if intersection.x < global_position.x:
 				sprite.flip_h = true  # Mira a la izquierda
 			else:
 				sprite.flip_h = false # Mira a la derecha
 
-# (Añade esto dentro de tu script del CharacterBody3D, por ejemplo, debajo de _aim_at_mouse())
-
 func _unhandled_input(_event):
-	# Si presionamos el clic izquierdo...
 	if Input.is_action_just_pressed("shoot"):
-		# Verificamos si el AimPivot tiene el arma equipada (por ahora sí)
 		if aim_pivot.has_node("Weapon"):
 			var weapon = aim_pivot.get_node("Weapon")
 			weapon.shoot()
+			

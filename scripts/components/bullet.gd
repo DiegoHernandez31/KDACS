@@ -14,6 +14,8 @@ func _physics_process(delta):
 	# La bala avanza hacia adelante en base a su propia rotación (-Z local)
 	global_position += -global_transform.basis.z * speed * delta
 
-func _on_body_entered(_body):
-	# Aquí a futuro pondremos: if body.has_method("take_damage")...
+func _on_body_entered(collider):
+	# Ejemplo dentro de tu lógica de disparo o proyectil:
+	if collider.has_method("take_damage"):
+		collider.take_damage(25)
 	queue_free() # Destruye la bala al chocar
