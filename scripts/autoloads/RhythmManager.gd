@@ -53,6 +53,11 @@ func ganar_energia(rollEnergyBonus):
 	energia_actual = min(energia_actual + rollEnergyBonus, energia_maxima) 
 	print("¡EXCELENTE! Diste en el blanco.")
 
+func perder_energia(cantidad: float):
+	energia_actual -= cantidad
+	if energia_actual <= 0:
+		_game_over()
+
 # Se llama cuando el jugador dispara fuera de ritmo o golpea una pared
 func registrar_fallo(motivo: String = "desconocido"):
 	energia_actual -= 10.0
