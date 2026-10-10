@@ -5,7 +5,10 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_d33xg"]
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_fulqv"]
+
 [node name="Enemy" type="CharacterBody3D" unique_id=141590176]
+process_mode = 1
 script = ExtResource("1_fulqv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=378649060]
@@ -14,3 +17,14 @@ shape = SubResource("CapsuleShape3D_d33xg")
 [node name="Sprite3D" type="Sprite3D" parent="." unique_id=632087859]
 transform = Transform3D(1, 0, 0, 0, 1.48, 0, 0, 0, 1, 0, 0, 0)
 texture = ExtResource("2_f2e6v")
+
+[node name="AttackArea" type="Area3D" parent="." unique_id=3145319]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea" unique_id=884815329]
+transform = Transform3D(2.9999692, -0.011387211, 0.0073638866, 0.01135786, 2.9999547, 0.011935189, -0.007409079, -0.011907188, 2.999967, 0, 0, 0)
+shape = SubResource("BoxShape3D_fulqv")
+
+[connection signal="body_entered" from="AttackArea" to="." method="_on_attack_area_body_entered"]
+[connection signal="body_exited" from="AttackArea" to="." method="_on_attack_area_body_exited"]
