@@ -30,11 +30,14 @@ var weapon_hold_active := false
 # --- MELEE ---
 const MELEE_RANGE := 1.4        # A qué distancia del jugador está el centro del golpe
 const MELEE_RADIUS := 0.9       # Tamaño del área de golpe
-const MELEE_DAMAGE := 0.5
+const MELEE_DAMAGE := 1.0
 const MELEE_COOLDOWN := 0.4
 
 var melee_cooldown_timer := 0.0
 const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
+
+func _ready() -> void:
+	add_to_group("player")
 
 func _physics_process(delta):
 	# Gravedad

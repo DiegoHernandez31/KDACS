@@ -15,7 +15,7 @@ func _on_body_entered(collider):
 	# Ejemplo dentro de tu lógica de disparo o proyectil:
 	if collider.has_method("take_damage"):
 		RhythmManager.registrar_exito()
-		collider.take_damage(1)
+		collider.take_damage(2)
 	else:
 		RhythmManager.registrar_fallo()
 	queue_free() # Destruye la bala al chocar
