@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://chai8yeo6e5vr"]
+
+[ext_resource type="Script" uid="uid://couqe3fhucicg" path="res://scenes/ui/scripts/game_over.gd" id="1_fu4wh"]
+[ext_resource type="Texture2D" uid="uid://coxk6hyokpofn" path="res://images/gameOver.jpeg" id="2_x6o8e"]
+
+[node name="game_over" type="Control" unique_id=860791862]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fu4wh")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=550445861]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=429720830]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_x6o8e")
+expand_mode = 1
+
+[node name="goToMenu" type="TextureButton" parent="." unique_id=1121787995]
+layout_mode = 0
+offset_left = 584.5858
+offset_top = 397.3216
+offset_right = 894.1911
+offset_bottom = 471.8978
+
+[node name="retry" type="TextureButton" parent="." unique_id=1263639072]
+layout_mode = 0
+offset_left = 583.2271
+offset_top = 483.0359
+offset_right = 903.37384
+offset_bottom = 562.2972
+
+[connection signal="pressed" from="goToMenu" to="." method="_on_go_to_menu_pressed"]
+[connection signal="pressed" from="retry" to="." method="_on_retry_pressed"]
