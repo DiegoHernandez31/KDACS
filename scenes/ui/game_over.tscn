@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://chai8yeo6e5vr"]
 
-[ext_resource type="Script" uid="uid://couqe3fhucicg" path="res://scenes/ui/scripts/game_over.gd" id="1_fu4wh"]
+[ext_resource type="Script" uid="uid://bck83soq8g26n" path="res://scenes/ui/game_over.gd" id="1_fu4wh"]
 [ext_resource type="Texture2D" uid="uid://coxk6hyokpofn" path="res://images/gameOver.jpeg" id="2_x6o8e"]
 
 [node name="game_over" type="Control" unique_id=860791862]
@@ -43,6 +43,3 @@ offset_left = 583.2271
 offset_top = 483.0359
 offset_right = 903.37384
 offset_bottom = 562.2972
-
-[connection signal="pressed" from="goToMenu" to="." method="_on_go_to_menu_pressed"]
-[connection signal="pressed" from="retry" to="." method="_on_retry_pressed"]
