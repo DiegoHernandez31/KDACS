@@ -6,9 +6,6 @@ extends Area3D
 func _ready():
 	# Destruye la bala después de 'lifetime' segundos para no saturar la memoria
 	get_tree().create_timer(lifetime).timeout.connect(queue_free)
-	
-	# Conectamos la señal de colisión (asegúrate de que en el nodo la señal 'body_entered' esté conectada a esta función)
-	body_entered.connect(_on_body_entered)
 
 func _physics_process(delta):
 	# La bala avanza hacia adelante en base a su propia rotación (-Z local)
@@ -17,5 +14,8 @@ func _physics_process(delta):
 func _on_body_entered(collider):
 	# Ejemplo dentro de tu lógica de disparo o proyectil:
 	if collider.has_method("take_damage"):
-		collider.take_damage(25)
+		RhythmManager.registrar_exito()
+		collider.take_damage(1)
+	else:
+		RhythmManager.registrar_fallo()
 	queue_free() # Destruye la bala al chocar
