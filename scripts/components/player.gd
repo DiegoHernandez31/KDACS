@@ -4,7 +4,12 @@ extends CharacterBody3D
 @onready var sprite = $Sprite3D
 @onready var aim_pivot = $AimPivot
 
+@export var health: int = 100
+
+var is_dead: bool = false # <--- ¡Aquí la definimos!
+
 const SPEED = 5.0
+const JUMP_VELOCITY = 6.0
 
 # --- ROLL ---
 const ROLL_SPEED = 11.0
@@ -36,13 +41,46 @@ const MELEE_COOLDOWN := 0.15
 var melee_cooldown_timer := 0.0
 const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
 
-func _ready() -> void:
+# 1. Añade estas variables al principio de tu script
+@export var mouse_sensitivity: float = 0.003
+@onready var head = $Head # Asegúrate de que este nombre coincida con el nodo que creaste
+
+func _ready():
+	# Tu código anterior (health, etc...)
 	add_to_group("player")
+	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+# 3. Añadimos esta nueva función para detectar los movimientos del mouse
+func _unhandled_input(event):
+	# Verificamos que el juego no esté pausado (por si el jugador murió)
+	if not is_dead and event is InputEventMouseMotion:
+		
+		# Gira TODO EL CUERPO de izquierda a derecha (Eje Y)
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		
+		# Gira SOLO LA CABEZA de arriba a abajo (Eje X)
+		head.rotate_x(-event.relative.y * mouse_sensitivity)
+		
+		# Limitamos la cabeza para no dar vueltas de 360 grados (mirar al techo/piso)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-80), deg_to_rad(80))
+
+func _process(delta):
+	# Si presionas Shift, alterna el estado del mouse
+	if Input.is_action_just_pressed("toggle_camera"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED: # (O CONFINED si usas Top-Down)
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED) # (O CONFINED si usas Top-Down)
 
 func _physics_process(delta):
 	# Gravedad
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+
+	# --- NUEVO: Lógica de Salto ---
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
 
 	# Cooldown del roll
 	if roll_cooldown_timer > 0.0:
@@ -137,19 +175,7 @@ func _end_roll():
 	tween.tween_property(sprite, "modulate:a", 1.0, 0.1)
 	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
 	
-func _unhandled_input(_event):
-	if Input.is_action_just_pressed("shoot"):
-		if aim_pivot.has_node("Weapon"):
-			var weapon = aim_pivot.get_node("Weapon")
-			
-			# --- INTEGRACIÓN DEL RITMO AQUÍ ---
-			# Evaluamos el ritmo antes de ejecutar el disparo
-			if not RhythmManager.es_en_beat():
-				RhythmManager.registrar_fallo() 
-			
-			weapon.shoot()
-		else:
-			_melee_attack()
+
 
 # --- SOLTAR / LANZAR / RECOGER ---
 
