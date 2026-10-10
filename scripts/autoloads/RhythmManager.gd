@@ -9,7 +9,7 @@ var tolerancia: float = 0.125 # Ventana de tiempo (en segundos) para acertar el 
 # --- CONFIGURACIÓN DE ENERGÍA ---
 var energia_maxima: float = 100.0
 var energia_actual: float = 100.0
-var tasa_drenado: float = 6.0 # Cuánta energía se pierde por segundo
+var tasa_drenado: float = 7.0 # Cuánta energía se pierde por segundo
 var enemigos_activos: int = 0  # Contador de enemigos en escena
 var offset_cancion: float = 0.0
 
@@ -55,7 +55,7 @@ func ganar_energia(rollEnergyBonus):
 
 # Se llama cuando el jugador dispara fuera de ritmo o golpea una pared
 func registrar_fallo(motivo: String = "desconocido"):
-	energia_actual -= 15.0
+	energia_actual -= 10.0
 	print("¡FALLASTE! motivo: ", motivo)
 	if energia_actual <= 0:
 		_game_over()

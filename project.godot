@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Project Dancin' Potato"
-run/main_scene="uid://dcgil1ev11tgp"
+run/main_scene="uid://bnx8dasmkrhh3"
 config/features=PackedStringArray("4.8", "GL Compatibility")
 config/icon="res://icon.svg"
 

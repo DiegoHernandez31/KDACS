@@ -7,7 +7,7 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_un3et"]
 height = 1.6435547
 
-[node name="CharacterBody3D" type="CharacterBody3D" unique_id=2133185571]
+[node name="CharacterBody3D" type="CharacterBody3D" unique_id=2133185571 groups=["player"]]
 collision_layer = 2
 script = ExtResource("1_ptpx7")
 

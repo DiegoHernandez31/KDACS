@@ -4,15 +4,22 @@
 [ext_resource type="PackedScene" uid="uid://bphk5wlno4bai" path="res://scenes/misc/beat_timer.tscn" id="1_4a5fo"]
 [ext_resource type="PackedScene" uid="uid://bbef8js0k1xdy" path="res://scenes/characters/Jhon_Pick.tscn" id="1_5nid0"]
 [ext_resource type="AudioStream" uid="uid://cx23nbj36xvgb" path="res://assets/audios/Dog_Extermination.ogg" id="1_e4ye6"]
+[ext_resource type="Script" uid="uid://cwabelvb5p20r" path="res://scripts/components/LevelManager.gd" id="1_s2s0q"]
 [ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="1_x5ymp"]
 [ext_resource type="Script" uid="uid://cxk2l8ybxpi6e" path="res://scripts/components/audio_stream_player.gd" id="2_3hn1f"]
 [ext_resource type="PackedScene" uid="uid://c108b11oonfmc" path="res://scenes/characters/enemy.tscn" id="2_d33xg"]
+[ext_resource type="PackedScene" uid="uid://5l2e6uhvj1um" path="res://scenes/misc/enemy_spawner.tscn" id="2_e7fa1"]
 [ext_resource type="Script" uid="uid://b1rr3fuefppff" path="res://scripts/components/cameraPlayer.gd" id="3_ckyui"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_5nid0"]
 size = Vector3(16.937805, 1.1748047, 11.358612)
 
 [node name="Node3D" type="Node3D" unique_id=992782541]
+script = ExtResource("1_s2s0q")
+
+[node name="EnemySpawner" parent="." unique_id=464815162 instance=ExtResource("2_e7fa1")]
+transform = Transform3D(1, 0, 0, 0, 0.7071068, 0.7071068, 0, -0.7071068, 0.7071068, -0.04760647, 1.0390615, -9.495671)
+enemy_scene = ExtResource("2_d33xg")
 
 [node name="BeatTimer" parent="." unique_id=1302528446 instance=ExtResource("1_4a5fo")]
 
@@ -33,19 +40,11 @@ grow_vertical = 0
 stream = ExtResource("1_e4ye6")
 script = ExtResource("2_3hn1f")
 
-[node name="CharacterBody3D" parent="." unique_id=2133185571 instance=ExtResource("1_5nid0")]
+[node name="Player" parent="." unique_id=2133185571 instance=ExtResource("1_5nid0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7054877, 0)
 
-[node name="Enemy" parent="." unique_id=141590176 instance=ExtResource("2_d33xg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.052291, -3.1639633)
-
-[node name="Enemy2" parent="." unique_id=91851019 instance=ExtResource("2_d33xg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3015575, 3.0544534, -3.2390246)
-
-[node name="Enemy3" parent="." unique_id=781931065 instance=ExtResource("2_d33xg")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5423384, 1.9262881, -5.2295027)
-
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=48323474]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1951347192]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.037078857, 0, -3.22435)
@@ -59,4 +58,4 @@ texture = ExtResource("1_x5ymp")
 [node name="Camera3D" type="Camera3D" parent="." unique_id=952598562 node_paths=PackedStringArray("target")]
 transform = Transform3D(1, 0, 0, 0, 0.70710677, 0.70710677, 0, -0.70710677, 0.70710677, 0, 7.8738747, 4.5980306)
 script = ExtResource("3_ckyui")
-target = NodePath("../CharacterBody3D")
+target = NodePath("../Player")
