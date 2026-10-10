@@ -41,6 +41,58 @@ const MELEE_COOLDOWN := 0.15
 
 var melee_cooldown_timer := 0.0
 const MELEE_OFFBEAT_MULT := 0.0   # Multiplicador de daño fuera de ritmo (0 = el golpe no hace daño)
+
+# 1. Añade estas variables al principio de tu script
+@export var mouse_sensitivity: float = 0.003
+@onready var head = $Head # Asegúrate de que este nombre coincida con el nodo que creaste
+
+func _ready():
+	# Tu código anterior (health, etc...)
+	add_to_group("player")
+	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	model_base_scale = model.scale
+	model_base_pos = model.position
+	for n in model.find_children("*", "MeshInstance3D", true, false):
+		_meshes.append(n)
+	_setup_skeleton()
+
+# 3. Añadimos esta nueva función para detectar los movimientos del mouse
+func _unhandled_input(event):
+	if Input.is_action_just_pressed("shoot"):
+		if aim_pivot.has_node("Weapon"):
+			var weapon = aim_pivot.get_node("Weapon")
+
+			if not RhythmManager.es_en_beat():
+				RhythmManager.registrar_fallo()
+				_on_shoot_pose()
+				return
+
+			weapon.shoot()
+			_on_shoot_pose()
+		else:
+			_melee_attack()
+	# Verificamos que el juego no esté pausado (por si el jugador murió)
+	if not is_dead and event is InputEventMouseMotion:
+		
+		# Gira TODO EL CUERPO de izquierda a derecha (Eje Y)
+		rotate_y(-event.relative.x * mouse_sensitivity)
+		
+		# Gira SOLO LA CABEZA de arriba a abajo (Eje X)
+		head.rotate_x(-event.relative.y * mouse_sensitivity)
+		
+		# Limitamos la cabeza para no dar vueltas de 360 grados (mirar al techo/piso)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-80), deg_to_rad(80))
+
+func _process(delta):
+	# Si presionas Shift, alterna el estado del mouse
+	if Input.is_action_just_pressed("toggle_camera"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED: # (O CONFINED si usas Top-Down)
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED) # (O CONFINED si usas Top-Down)
+# --- MODELO 3D ---
+# Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
 # --- MODELO 3D ---
 # Ángulos de la caminata (radianes). Súbelos/bájalos para exagerar o suavizar.
 
