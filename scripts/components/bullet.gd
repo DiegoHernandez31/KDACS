@@ -12,6 +12,8 @@ func _physics_process(delta):
 	global_position += -global_transform.basis.z * speed * delta
 
 func _on_body_entered(collider):
+	if collider.is_in_group("player"):
+		return
 	# Ejemplo dentro de tu lógica de disparo o proyectil:
 	if collider.has_method("take_damage"):
 		RhythmManager.registrar_exito()

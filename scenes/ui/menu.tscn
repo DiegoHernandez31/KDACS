@@ -32,24 +32,24 @@ expand_mode = 1
 
 [node name="play" type="TextureButton" parent="." unique_id=605297523]
 layout_mode = 0
-offset_left = 513.0
-offset_top = 323.0
-offset_right = 751.0
-offset_bottom = 406.0
+offset_left = 520.5
+offset_top = 360.5
+offset_right = 758.5
+offset_bottom = 443.5
 
 [node name="exit" type="TextureButton" parent="." unique_id=886974188]
 layout_mode = 0
 offset_left = 515.0
-offset_top = 421.0
+offset_top = 439.75
 offset_right = 777.0
-offset_bottom = 503.0
+offset_bottom = 521.75
 
 [node name="credits" type="TextureButton" parent="." unique_id=2089877315]
 layout_mode = 0
 offset_left = 510.0
-offset_top = 512.0
+offset_top = 534.5
 offset_right = 755.0
-offset_bottom = 589.0
+offset_bottom = 611.5
 
 [connection signal="pressed" from="play" to="." method="_on_play_pressed"]
 [connection signal="pressed" from="exit" to="." method="_on_exit_pressed"]

@@ -1,0 +1,5 @@
+[gd_scene format=3 uid="uid://x35e6br7675p"]
+
+[ext_resource type="PackedScene" uid="uid://dkjljbidkg6md" path="res://papa_calle_completo/papa_calle.glb" id="1_j2koy"]
+
+[node name="papa_calle" unique_id=853673538 instance=ExtResource("1_j2koy")]
