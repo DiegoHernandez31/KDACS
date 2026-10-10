@@ -14,6 +14,7 @@ enum AttackMode { RANGED, MELEE }
 @export var turn_speed: float = 10.0
 @export var detection_range: float = 1000.0   # 1000 = te persigue desde cualquier lado del mapa
 @export var lose_range: float = 1000.0
+@export var explosion_size: float = 0.7   # 1.0 = tamaño de la explosión de la papa
 @export var attack_damage: float = 10.0
 @export var attack_speed: float = 1.0         # Segundos entre ataques
 @export var separation_radius: float = 1.2    # Distancia que intentan mantener entre enemigos
@@ -328,12 +329,13 @@ func take_damage(amount: float) -> void:
 		die()
 
 
-func die() -> void:
+func die():
 	if is_dead:
 		return
-
 	is_dead = true
 	died.emit()
+	RhythmManager.enemigos_activos -= 1
+	ExplosionFX.spawn(get_tree().current_scene, global_position + Vector3(0, 0.7, 0), explosion_size)
 	queue_free()
 
 
