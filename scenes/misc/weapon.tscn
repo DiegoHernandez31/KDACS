@@ -2,17 +2,17 @@
 
 [ext_resource type="Script" uid="uid://dt542lglxcpkd" path="res://scripts/components/weapon.gd" id="1_s52a3"]
 [ext_resource type="PackedScene" uid="uid://b45dhjbap4dv1" path="res://scenes/misc/bullet.tscn" id="2_a01a0"]
-
-[sub_resource type="BoxMesh" id="BoxMesh_30nr5"]
-size = Vector3(0.7947998, 0.4, 0.5835596)
+[ext_resource type="PackedScene" uid="uid://cu3qowgjstfki" path="res://resources/models/Super_Laser.glb" id="3_7oe3r"]
 
 [node name="Weapon" type="Node3D" unique_id=1486592218]
 script = ExtResource("1_s52a3")
 bullet_scene = ExtResource("2_a01a0")
 
 [node name="Muzzle" type="Marker3D" parent="." unique_id=1995752147]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0045804977, 0, -0.5074231)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.40009013, 0.2654305, -0.70360845)
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=514663715]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0.0041796863, 0, -4.6674926e-09)
-mesh = SubResource("BoxMesh_30nr5")
+[node name="Model" parent="." unique_id=1403077182 instance=ExtResource("3_7oe3r")]
+transform = Transform3D(-3, 0, -2.6226832e-07, 0, 3, 0, 2.6226832e-07, 0, -3, 0.4, 0.2, -0.5)
+
+[node name="Grip" type="Marker3D" parent="." unique_id=67195450]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.37678266, -0.22287685, -0.3162482)

@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://bbef8js0k1xdy"]
 
 [ext_resource type="Script" uid="uid://b47s442qqdhdd" path="res://scripts/components/player.gd" id="1_ptpx7"]
-[ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="1_pvrm2"]
+[ext_resource type="PackedScene" uid="uid://bfhqqs8bhvpkg" path="res://resources/models/JhonPick.glb" id="3_6cg6r"]
 [ext_resource type="PackedScene" uid="uid://djwy8wpddvjp5" path="res://scenes/misc/weapon.tscn" id="3_7rpi8"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_un3et"]
@@ -15,10 +15,6 @@ script = ExtResource("1_ptpx7")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32177734, 0)
 shape = SubResource("CapsuleShape3D_un3et")
 
-[node name="Sprite3D" type="Sprite3D" parent="." unique_id=299220762]
-transform = Transform3D(0.86610544, 0, 0, 0, 1.1799874, 0, 0, 0, 1, 0, 0.28403473, 0)
-texture = ExtResource("1_pvrm2")
-
 [node name="AimPivot" type="Node3D" parent="." unique_id=2043554571]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28591418, 0)
 
@@ -28,3 +24,11 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28591418, 0)
 
 [node name="Camera3D" type="Camera3D" parent="Head" unique_id=1155757769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 3)
+[node name="Visual" type="Node3D" parent="." unique_id=2015847059]
+
+[node name="Model" parent="Visual" unique_id=484934853 instance=ExtResource("3_6cg6r")]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=167590002]
+transform = Transform3D(0.8660254, 0.40957603, -0.28678823, 0, 0.57357645, 0.81915206, 0.5, -0.7094065, 0.49673176, 0, 0, 0)
+light_energy = 7.0
+shadow_enabled = true
