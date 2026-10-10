@@ -4,6 +4,8 @@ const GAME_OVER_SCENE := "res://scenes/ui/game_over.tscn"  # <- pon la ruta real
 
 var ultimo_nivel: String = ""
 var _game_over_activo := false
+signal energia_agotada
+var modo_tutorial := false
 
 # --- CONFIGURACIÓN DE RITMO ---
 var bpm: float = 140.0
@@ -30,6 +32,19 @@ func configurar_musica(player: AudioStreamPlayer):
 	energia_actual = energia_maxima
 	enemigos_activos = 0
 	_game_over_activo = false
+	
+	# Verificar si el stream tiene metadatos de BPM configurados
+	if audio_player.stream and "bpm" in audio_player.stream:
+		var stream_bpm = audio_player.stream.bpm
+		if stream_bpm > 0:
+			bpm = stream_bpm
+			sec_por_beat = 60.0 / bpm
+			print("RhythmManager: BPM automático detectado del audio -> ", bpm)
+		else:
+			print("RhythmManager (ADVERTENCIA): El audio tiene 0 BPM en sus metadatos. Usando fallback de -> ", bpm)
+	else:
+		print("RhythmManager (ADVERTENCIA): Formato de audio sin propiedad BPM. Usando fallback de -> ", bpm)
+		
 	audio_player.play()
 
 func _process(delta):
@@ -91,6 +106,10 @@ func es_en_beat() -> bool:
 	return abs(desfase) <= tolerancia
 
 func _game_over() -> void:
+  if modo_tutorial:
+		energia_actual = energia_maxima
+		energia_agotada.emit()
+		return
 	if _game_over_activo:
 		return   # evita que se dispare varias veces (por eso salía 4 veces el mensaje)
 	_game_over_activo = true
