@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Project Dancin' Potato"
-run/main_scene="uid://bnx8dasmkrhh3"
+run/main_scene="uid://dcgil1ev11tgp"
 config/features=PackedStringArray("4.8", "GL Compatibility")
 boot_splash/stretch_mode=0
 boot_splash/image="uid://bw74xx4l7idaq"
