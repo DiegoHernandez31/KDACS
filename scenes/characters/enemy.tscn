@@ -5,7 +5,7 @@
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_d33xg"]
 radius = 0.45776367
-height = 0.91552734
+height = 1.3659668
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_s2s0q"]
 radius = 0.38964844
@@ -17,7 +17,7 @@ script = ExtResource("1_fulqv")
 [node name="Model" parent="." unique_id=825630524 instance=ExtResource("2_fulqv")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=378649060]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5422363, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.76745605, 0)
 shape = SubResource("CapsuleShape3D_d33xg")
 
 [node name="AttackArea" type="Area3D" parent="." unique_id=745331196]
