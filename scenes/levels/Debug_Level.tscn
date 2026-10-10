@@ -1,7 +1,11 @@
 [gd_scene format=3 uid="uid://bnx8dasmkrhh3"]
 
+[ext_resource type="PackedScene" uid="uid://bug248soj7nns" path="res://scenes/misc/progress_bar.tscn" id="1_3hn1f"]
+[ext_resource type="PackedScene" uid="uid://bphk5wlno4bai" path="res://scenes/misc/beat_timer.tscn" id="1_4a5fo"]
 [ext_resource type="PackedScene" uid="uid://bbef8js0k1xdy" path="res://scenes/characters/Jhon_Pick.tscn" id="1_5nid0"]
+[ext_resource type="AudioStream" uid="uid://cx23nbj36xvgb" path="res://assets/audios/Dog_Extermination.ogg" id="1_e4ye6"]
 [ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="1_x5ymp"]
+[ext_resource type="Script" uid="uid://cxk2l8ybxpi6e" path="res://scripts/components/audio_stream_player.gd" id="2_3hn1f"]
 [ext_resource type="PackedScene" uid="uid://c108b11oonfmc" path="res://scenes/characters/enemy.tscn" id="2_d33xg"]
 [ext_resource type="Script" uid="uid://b1rr3fuefppff" path="res://scripts/components/cameraPlayer.gd" id="3_ckyui"]
 
@@ -10,11 +14,36 @@ size = Vector3(16.937805, 1.1748047, 11.358612)
 
 [node name="Node3D" type="Node3D" unique_id=992782541]
 
+[node name="BeatTimer" parent="." unique_id=1302528446 instance=ExtResource("1_4a5fo")]
+
+[node name="ProgressBar" parent="." unique_id=751095478 instance=ExtResource("1_3hn1f")]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -298.0
+offset_top = -133.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1304069658]
+stream = ExtResource("1_e4ye6")
+script = ExtResource("2_3hn1f")
+
 [node name="CharacterBody3D" parent="." unique_id=2133185571 instance=ExtResource("1_5nid0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.7054877, 0)
 
 [node name="Enemy" parent="." unique_id=141590176 instance=ExtResource("2_d33xg")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.052291, -3.1639633)
+
+[node name="Enemy2" parent="." unique_id=91851019 instance=ExtResource("2_d33xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3015575, 3.0544534, -3.2390246)
+
+[node name="Enemy3" parent="." unique_id=781931065 instance=ExtResource("2_d33xg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5423384, 1.9262881, -5.2295027)
 
 [node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=48323474]
 

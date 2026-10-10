@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://bphk5wlno4bai"]
+
+[ext_resource type="Script" uid="uid://c1wioejg8qthf" path="res://scripts/components/color_rect.gd" id="1_ol154"]
+
+[node name="BeatTimer" type="Control" unique_id=2044277994]
+layout_mode = 3
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 41.499878
+offset_top = -241.59186
+offset_right = 290.7315
+offset_bottom = -22.636292
+grow_vertical = 0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_ol154")
