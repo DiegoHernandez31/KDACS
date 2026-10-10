@@ -1,5 +1,10 @@
 extends Node
 
+const GAME_OVER_SCENE := "res://scenes/ui/game_over.tscn"  # <- pon la ruta real de tu game_over.tscn
+
+var ultimo_nivel: String = ""
+var _game_over_activo := false
+
 # --- CONFIGURACIÓN DE RITMO ---
 var bpm: float = 140.0
 var sec_por_beat: float
@@ -22,6 +27,9 @@ func _ready():
 
 func configurar_musica(player: AudioStreamPlayer):
 	audio_player = player
+	energia_actual = energia_maxima
+	enemigos_activos = 0
+	_game_over_activo = false
 	audio_player.play()
 
 func _process(delta):
@@ -82,7 +90,13 @@ func es_en_beat() -> bool:
 	print("t=%.2f | desfase=%+.3f s | tol=%.3f" % [pos, desfase, tolerancia])
 	return abs(desfase) <= tolerancia
 
-func _game_over():
+func _game_over() -> void:
+	if _game_over_activo:
+		return   # evita que se dispare varias veces (por eso salía 4 veces el mensaje)
+	_game_over_activo = true
+	enemigos_activos = 0
+	audio_player = null   # el reproductor se destruye con el nivel
+	ultimo_nivel = get_tree().current_scene.scene_file_path
 	print("GAME OVER - Te quedaste sin energía")
-	# Aquí puedes pausar el juego o recargar la escena
-	# get_tree().reload_current_scene()
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	get_tree().change_scene_to_file.call_deferred(GAME_OVER_SCENE)

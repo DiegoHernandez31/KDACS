@@ -5,6 +5,8 @@ extends CharacterBody3D
 @onready var model: Node3D = $Visual/Model
 @onready var skeleton: Skeleton3D = model.find_child("Skeleton3D", true, false)
 @onready var aim_pivot = $AimPivot
+@onready var game_over_ui = $CanvasLayer/game_over
+#@onready var anim_player = $AnimationPlayer # (Descomenta esto cuando tengas tu animación)
 
 @export var health: int = 100
 
@@ -72,6 +74,7 @@ var _meshes: Array[MeshInstance3D] = []
 var _swing_axis := {}
 
 func _ready():
+	print("PLAYER READY, game_over_ui = ", game_over_ui)
 	# Tu código anterior (health, etc...)
 	add_to_group("player")
 	# 2. Esto atrapa el mouse y lo vuelve invisible para jugar cómodamente
@@ -81,6 +84,7 @@ func _ready():
 	for n in model.find_children("*", "MeshInstance3D", true, false):
 		_meshes.append(n)
 	_setup_skeleton()
+	game_over_ui.visible = false
 
 func _unhandled_input(_event):
 	if Input.is_action_just_pressed("shoot"):
@@ -456,6 +460,9 @@ func recibir_dano(cantidad: float) -> void:
 	if is_invulnerable:
 		return
 	RhythmManager.perder_energia(cantidad)
+	if RhythmManager.energia_actual<= 0:
+		die()
+		return
 
 	# Parpadeo de transparencia para feedback 3D
 	var tween = create_tween()
@@ -469,3 +476,40 @@ func _move_basis() -> Basis:
 	if _is_free_look():
 		return Basis(Vector3.UP, camera.global_rotation.y)
 	return Basis.IDENTITY
+	
+func die():
+	print("die() llamado")
+	if is_dead:
+		return
+		
+	is_dead = true
+	print("El jugador ha muerto.")
+	
+	# 1. Preparar/Reproducir la animación
+	# anim_player.play("animacion_de_muerte")
+	
+	# 2. Desactivar colisión para que los enemigos te ignoren
+	if has_node("CollisionShape3D"):
+		$CollisionShape3D.set_deferred("disabled", true)
+		
+	# 3. Mostrar el menú de Game Over
+	game_over_ui.visible = true
+	
+	# 4. Liberar el mouse para poder hacer clic en los botones
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	
+	print("game_over_ui: ", game_over_ui, " visible: ", game_over_ui.visible, " size: ", game_over_ui.size if game_over_ui is Control else "n/a")
+
+
+func _on_go_to_menu_2_pressed() -> void:
+	# Reinicia la escena actual
+	get_tree().reload_current_scene()
+
+
+func _on_retry_2_pressed() -> void:
+	# Cambia a la escena de tu menú principal (Asegúrate de poner la ruta correcta aquí)
+	get_tree().change_scene_to_file("res://MainMenu.tscn")
+
+func _input(event):
+	if event is InputEventKey and event.pressed and event.keycode == KEY_K:
+		die()
