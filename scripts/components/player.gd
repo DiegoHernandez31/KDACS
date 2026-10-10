@@ -53,16 +53,8 @@ const SHOOT_RECOIL := 0.2       # Pequeño "latigazo" extra hacia arriba en cada
 const SHOOT_RECOIL_DECAY := 2.5 # Qué tan rápido se disipa el retroceso
 
 # --- ARMA EN LA MANO ---
-# Dónde se agarra el arma, en el espacio LOCAL del hueso de la mano (el eje Y del hueso
-# apunta hacia los dedos). (0, 0.1, 0) = centro de la mano. Ajusta aquí para mover el
-# arma respecto a la mano: X = lateral, Y = hacia los dedos, Z = adelante/atrás del hueso.
 const GRIP_OFFSET := Vector3(0.0, 0.2, 0.1)
-# Ajuste fino del agarre en el espacio LOCAL del arma (se suma al centro automático).
-# Úsalo para correr la empuñadura: p. ej. subir/bajar o mover hacia atrás del arma.
 const WEAPON_GRIP_NUDGE := Vector3.ZERO
-# Cuánto apunta hacia abajo el arma cuando el brazo cuelga (grados bajo la horizontal).
-# 90 = totalmente vertical, 0 = apuntando al frente como antes. Al subir el brazo
-# para disparar, el arma se endereza sola hasta apuntar al mouse.
 const WEAPON_LOWERED_PITCH := 70.0
 var _hand_idx := -1
 var _arm_r_angle := 0.0   # Ángulo actual del brazo derecho (lo escribe _animate_model)
@@ -135,19 +127,17 @@ func _aim_at_mouse():
 	var intersection = floor_plane.intersects_ray(ray_origin, ray_direction)
 	
 	if intersection != null:
-		# El pivot siempre mira en un plano horizontal (solo rota en el eje Y)
 		var look_target = Vector3(intersection.x, aim_pivot.global_position.y, intersection.z)
 		
 		if not aim_pivot.global_position.is_equal_approx(look_target):
 			aim_pivot.look_at(look_target, Vector3.UP)
 
-		# El modelo mira hacia el mouse. Su frente es +Z, por eso atan2(x, z).
 		var dir = intersection - global_position
 		dir.y = 0.0
 		if dir.length_squared() > 0.001:
 			visual.global_rotation.y = atan2(dir.x, dir.z)
 
-# --- ANIMACIÓN PROCEDURAL (el modelo no trae clips de animación) ---
+# --- ANIMACIÓN PROCEDURAL ---
 
 func _setup_skeleton() -> void:
 	if skeleton == null:
@@ -160,20 +150,13 @@ func _setup_skeleton() -> void:
 			push_warning("Hueso no encontrado: " + n)
 			continue
 		var rest_basis := skeleton.get_bone_global_rest(i).basis
-		# Eje lateral del modelo (X) expresado en el marco del hueso
 		_swing_axis[n] = {
 			"idx": i,
 			"axis": (rest_basis.inverse() * Vector3.RIGHT).normalized(),
-			# Rotación local de reposo del hueso (ver nota en _swing)
 			"rest_q": skeleton.get_bone_rest(i).basis.orthonormalized().get_rotation_quaternion()
 		}
 	_hand_idx = skeleton.find_bone("hand.R")
 
-# Ángulo positivo = la parte de abajo del hueso se va hacia ATRÁS (-Z).
-# IMPORTANTE (Godot 4): set_bone_pose_rotation REEMPLAZA la rotación del hueso, no se
-# suma a la de reposo. Si solo pasas Quaternion(eje, ángulo), el hueso pierde su
-# orientación original (brazos hacia arriba, piernas hacia el pecho). Por eso se
-# multiplica por la rotación de reposo: rest_q * giro.
 func _swing(n: String, angle: float) -> void:
 	if not _swing_axis.has(n):
 		return
@@ -182,7 +165,6 @@ func _swing(n: String, angle: float) -> void:
 
 func _animate_model(delta: float) -> void:
 	var speed := Vector2(velocity.x, velocity.z).length()
-	# Durante el roll no se camina: la pose vuelve a neutra (antes se quedaba congelada)
 	var moving := speed > 0.1 and is_on_floor() and not is_rolling
 	walk_blend = move_toward(walk_blend, 1.0 if moving else 0.0, delta * 8.0)
 	if moving:
@@ -191,22 +173,15 @@ func _animate_model(delta: float) -> void:
 	var s := sin(walk_time)
 	var c := cos(walk_time)
 
-	# Caderas: una pierna adelante, la otra atrás
 	_swing("thigh.L",  s * WALK_THIGH * walk_blend)
 	_swing("thigh.R", -s * WALK_THIGH * walk_blend)
 
-	# Rodillas: SOLO se flexionan cuando esa pierna va hacia adelante (fase de balanceo),
-	# así el pie se levanta sin plegarse hacia el cuerpo.
 	_swing("shin.L", maxf(0.0, -c) * WALK_KNEE * walk_blend)
 	_swing("shin.R", maxf(0.0,  c) * WALK_KNEE * walk_blend)
 
-	# Brazos en oposición a las piernas, con las manos contrarrestando el giro
-	# para que no se levanten ni apunten hacia arriba.
 	var arm_l := -s * WALK_ARM * walk_blend
 	var arm_r_walk :=  s * WALK_ARM * walk_blend
 
-	# Brazo derecho (el del arma): al disparar sube hacia donde apunta el personaje
-	# y se queda un momento; después vuelve a balancearse con la caminata.
 	shoot_arm_timer = maxf(0.0, shoot_arm_timer - delta)
 	var raise_target := 1.0 if (shoot_arm_timer > 0.0 and not is_rolling) else 0.0
 	shoot_arm_blend = move_toward(shoot_arm_blend, raise_target, delta * SHOOT_ARM_SPEED)
@@ -217,10 +192,8 @@ func _animate_model(delta: float) -> void:
 	_swing("upper_arm.L", arm_l)
 	_swing("upper_arm.R", arm_r)
 	_swing("hand.L", -arm_l * WALK_HAND_COUNTER)
-	# La mano solo contrarresta el balanceo de caminata, no la elevación del disparo
 	_swing("hand.R", -arm_r_walk * WALK_HAND_COUNTER * (1.0 - shoot_arm_blend))
 
-	# Saltito y balanceo del cuerpo
 	if moving:
 		model.position.y = model_base_pos.y + absf(s) * 0.04
 		model.rotation.z = s * 0.05
@@ -228,16 +201,10 @@ func _animate_model(delta: float) -> void:
 		model.position.y = lerpf(model.position.y, model_base_pos.y, 10.0 * delta)
 		model.rotation.z = lerp_angle(model.rotation.z, 0.0, 10.0 * delta)
 
-# El arma sigue a la mano derecha. Sigue siendo hija de AimPivot (así el disparo,
-# has_node("Weapon"), soltar y recoger funcionan igual que antes); solo se copia su
-# POSICIÓN desde la mano cada frame. Su orientación sigue apuntando al mouse.
 func _update_weapon_to_hand() -> void:
 	var w := _get_weapon()
 	if w == null or skeleton == null or _hand_idx == -1:
 		return
-	# Orientación: con el brazo abajo el arma apunta hacia abajo (como si la sostuviera);
-	# al subir el brazo se endereza hasta apuntar al mouse. Durante el disparo está
-	# 100% apuntando, para que las balas salgan hacia el cursor.
 	if not w.has_meta("hold_basis"):
 		w.set_meta("hold_basis", w.basis)
 	var hold_basis: Basis = w.get_meta("hold_basis")
@@ -249,12 +216,9 @@ func _update_weapon_to_hand() -> void:
 
 	var hand_xf: Transform3D = skeleton.global_transform * skeleton.get_bone_global_pose(_hand_idx)
 	var grip_world: Vector3 = hand_xf * GRIP_OFFSET
-	# Se coloca el PUNTO DE AGARRE del arma (no su origen) en la mano
 	var grip_local := _weapon_grip_point(w) + WEAPON_GRIP_NUDGE
 	w.global_position = grip_world - w.global_basis * grip_local
 
-# Punto de agarre del arma en su espacio local. Si la escena del arma tiene un nodo
-# Node3D/Marker3D llamado "Grip", se usa ese. Si no, se usa el centro de su malla.
 func _weapon_grip_point(w: Node3D) -> Vector3:
 	if w.has_meta("grip_point"):
 		return w.get_meta("grip_point")
@@ -279,11 +243,9 @@ func _weapon_grip_point(w: Node3D) -> Vector3:
 	w.set_meta("grip_point", point)
 	return point
 
-# Llamar justo al disparar: sube el brazo derecho y da el pequeño retroceso
 func _on_shoot_pose() -> void:
 	shoot_arm_timer = SHOOT_ARM_HOLD
 	shoot_recoil = SHOOT_RECOIL
-	# Enderezar el arma YA, antes de que salga la bala (si no, el primer tiro saldría hacia abajo)
 	_update_weapon_to_hand()
 
 func _set_model_alpha(a: float) -> void:
@@ -296,7 +258,6 @@ func can_roll() -> bool:
 	return not is_rolling and roll_cooldown_timer <= 0.0 and is_on_floor()
 
 func _start_roll():
-	# Dirección: la del input; si no hay input, hacia donde apunta el mouse
 	var input_dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	var dir = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	if dir == Vector3.ZERO:
@@ -310,11 +271,9 @@ func _start_roll():
 	roll_timer = ROLL_DURATION
 	roll_cooldown_timer = ROLL_COOLDOWN
 
-	# Bonus de energía si se hizo en beat
 	if RhythmManager.es_en_beat():
 		RhythmManager.ganar_energia(ROLL_ENERGY_BONUS)
 
-	# Feedback visual: modelo semitransparente y "aplastado" mientras rueda
 	model.position = model_base_pos
 	model.rotation.z = 0.0
 	var tween = create_tween().set_parallel(true)
@@ -333,8 +292,6 @@ func _unhandled_input(_event):
 		if aim_pivot.has_node("Weapon"):
 			var weapon = aim_pivot.get_node("Weapon")
 			
-			# --- INTEGRACIÓN DEL RITMO AQUÍ ---
-			# Evaluamos el ritmo antes de ejecutar el disparo
 			if not RhythmManager.es_en_beat():
 				RhythmManager.registrar_fallo() 
 			
@@ -352,7 +309,6 @@ func _handle_weapon_input(delta: float) -> void:
 	if Input.is_action_just_pressed("drop_weapon"):
 		var nearby := _find_nearby_weapon()
 		if nearby:
-			# Recoger (y si ya tienes arma, se intercambia al instante)
 			_pickup(nearby)
 			weapon_hold_active = false
 		elif _get_weapon():
@@ -382,7 +338,6 @@ func _find_nearby_weapon() -> DroppedWeapon:
 			closest = dw
 	return closest
 
-# Saca el arma de la mano y la deja en el mundo (suelta o lanzada)
 func _detach_weapon(throw: bool) -> void:
 	var w := _get_weapon()
 	if w == null:
@@ -390,7 +345,7 @@ func _detach_weapon(throw: bool) -> void:
 
 	if w.has_meta("hold_basis"):
 		w.basis = w.get_meta("hold_basis")
-	w.set_meta("hold_transform", w.transform)  # Para devolverla igual al recogerla
+	w.set_meta("hold_transform", w.transform)
 	aim_pivot.remove_child(w)
 
 	var dir = -aim_pivot.global_transform.basis.z
@@ -408,7 +363,6 @@ func _detach_weapon(throw: bool) -> void:
 		dropped.linear_velocity = dir * 1.0 + Vector3.UP * 1.5
 
 func _pickup(dw: DroppedWeapon) -> void:
-	# Si ya tienes arma, la suelta primero (intercambio inmediato)
 	if _get_weapon():
 		_detach_weapon(false)
 
@@ -425,7 +379,6 @@ func _melee_attack() -> void:
 		return
 	melee_cooldown_timer = MELEE_COOLDOWN
 
-	# El ritmo se evalúa UNA vez, en el instante del clic
 	var en_beat: bool = RhythmManager.es_en_beat()
 	if not en_beat:
 		RhythmManager.registrar_fallo("melee fuera de ritmo")
@@ -451,24 +404,32 @@ func _melee_attack() -> void:
 			var body = h.collider
 			if body.has_method("take_damage"):
 				body.take_damage(damage)
-				RhythmManager.registrar_exito()  # Acierto: recupera energía, como la bala
+				RhythmManager.registrar_exito()
 
-	# Feedback visual: el golpe en beat se ve más fuerte
 	var escala := Vector3(1.25, 0.9, 1.0) if en_beat else Vector3(1.08, 0.97, 1.0)
 	var tween = create_tween()
 <<<<<<< HEAD
 	tween.tween_property(model, "scale", model_base_scale * escala, 0.05)
 	tween.tween_property(model, "scale", model_base_scale, 0.1)
+<<<<<<< HEAD
 =======
 	tween.tween_property(sprite, "scale", escala, 0.05)
 	tween.tween_property(sprite, "scale", Vector3.ONE, 0.1)
+=======
+>>>>>>> CharacterModels
 
 func recibir_dano(cantidad: float) -> void:
 	if is_invulnerable:
 		return
 	RhythmManager.perder_energia(cantidad)
 
+<<<<<<< HEAD
 	# Feedback: flash rojo
 	sprite.modulate = Color(1.6, 0.4, 0.4)
 	create_tween().tween_property(sprite, "modulate", Color.WHITE, 0.2)
 >>>>>>> bbcc409a64dac97464d1be53c852023fb44ee6de
+=======
+	# Parpadeo de transparencia para feedback 3D
+	var tween = create_tween()
+	tween.tween_method(_set_model_alpha, 0.3, 1.0, 0.2)
+>>>>>>> CharacterModels
