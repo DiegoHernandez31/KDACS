@@ -11,6 +11,7 @@ radius = 0.25
 height = 1.0
 
 [node name="Bullet" type="Area3D" unique_id=1193110085]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 0, 0, 0)
 collision_layer = 4
 collision_mask = 3
 script = ExtResource("1_7d8n7")
