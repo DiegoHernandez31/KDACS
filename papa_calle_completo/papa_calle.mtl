@@ -1,0 +1,394 @@
+newmtl asfalto
+Kd 0.2 0.2 0.28
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl acera
+Kd 0.78 0.74 0.68
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl suelo
+Kd 0.4 0.65 0.35
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl linea
+Kd 1.0 0.85 0.15
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl cebra
+Kd 0.95 0.95 0.95
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl bordillo
+Kd 1.0 0.82 0.15
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl pared_azul
+Kd 0.25 0.45 0.85
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl pared_morada
+Kd 0.62 0.25 0.78
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl pared_naranja
+Kd 0.96 0.55 0.2
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl pared_roja
+Kd 0.85 0.2 0.18
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl ladrillo_rojo
+Kd 1.0 0.58 0.48
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/ladrillo.png
+
+newmtl ladrillo_crema
+Kd 1.0 0.88 0.68
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/ladrillo.png
+
+newmtl ladrillo_azul
+Kd 0.68 0.78 1.0
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/ladrillo.png
+
+newmtl techo_rojo
+Kd 0.8 0.18 0.22
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl techo_marron
+Kd 0.4 0.22 0.12
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl techo_azul
+Kd 0.2 0.3 0.65
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl techo_morado
+Kd 0.45 0.18 0.55
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl cornisa
+Kd 0.97 0.92 0.8
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl marco
+Kd 0.95 0.95 0.98
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl puerta
+Kd 0.35 0.18 0.1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl toldo_azul
+Kd 0.2 0.4 0.95
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl toldo_rosa
+Kd 1.0 0.4 0.75
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl metal
+Kd 0.4 0.4 0.45
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl metal_oscuro
+Kd 0.15 0.15 0.2
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl lampara
+Kd 1.0 0.95 0.6
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+Ke 1.0 0.9 0.5
+
+newmtl hidrante
+Kd 0.95 0.25 0.2
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl carton_rojo
+Kd 0.85 0.1 0.12
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl papa_frita
+Kd 1.0 0.82 0.2
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl conos
+Kd 1.0 0.5 0.1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl banco_madera
+Kd 0.62 0.42 0.22
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl buzon
+Kd 0.2 0.35 0.9
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl portal
+Kd 0.6 0.35 0.18
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl tanque
+Kd 0.55 0.35 0.25
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl cuerda
+Kd 0.9 0.9 0.9
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+
+newmtl neon_cian
+Kd 0.3 0.95 1.0
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+Ke 0.3 0.95 1.0
+
+newmtl neon_rosa
+Kd 1.0 0.3 0.8
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+Ke 1.0 0.3 0.8
+
+newmtl neon_amarillo
+Kd 1.0 0.85 0.2
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+Ke 1.0 0.85 0.2
+
+newmtl vidrio
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/vidrio.png
+
+newmtl toldo_rayas
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/toldo.png
+
+newmtl barrera
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/barrera.png
+
+newmtl caja
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/caja.png
+
+newmtl garra_cubo
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/cubo_garra.png
+
+newmtl logo_papas
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/logo_papas.png
+
+newmtl cartel_veterinaria
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/veterinaria.png
+
+newmtl cartel_heroes
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/heroes.png
+
+newmtl cartel_papas
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/papas.png
+
+newmtl cartel_pelu
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/pelu.png
+
+newmtl cartel_mercado
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/mercado.png
+
+newmtl cartel_dogcity
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/dogcity.png
+
+newmtl cartel_comepapas
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/comepapas.png
+
+newmtl cartel_shiba
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/shiba.png
+
+newmtl cartel_caniche
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/caniche.png
+
+newmtl cartel_bulldog
+Kd 1 1 1
+Ka 0 0 0
+Ks 0 0 0
+d 1
+illum 1
+map_Kd texturas/bulldog.png
+

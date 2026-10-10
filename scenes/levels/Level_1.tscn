@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c6jqic3kvbaug"]
+
+[ext_resource type="PackedScene" uid="uid://c3hqptm6lel1o" path="res://mapa/papa_calle.glb" id="1_ukdbm"]
+
+[node name="Node3D" type="Node3D" unique_id=591512023]
+
+[node name="papa_calle" parent="." unique_id=1963104299 instance=ExtResource("1_ukdbm")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.1166602, 0.017854452, -6.991232)

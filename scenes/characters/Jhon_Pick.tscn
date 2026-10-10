@@ -1,0 +1,25 @@
+[gd_scene format=3 uid="uid://bbef8js0k1xdy"]
+
+[ext_resource type="Script" uid="uid://b47s442qqdhdd" path="res://scripts/components/player.gd" id="1_ptpx7"]
+[ext_resource type="Texture2D" uid="uid://m5i2oylulh8x" path="res://icon.svg" id="1_pvrm2"]
+[ext_resource type="PackedScene" uid="uid://djwy8wpddvjp5" path="res://scenes/misc/weapon.tscn" id="3_7rpi8"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_un3et"]
+height = 1.6435547
+
+[node name="CharacterBody3D" type="CharacterBody3D" unique_id=2133185571 groups=["player"]]
+collision_layer = 2
+script = ExtResource("1_ptpx7")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=57734452]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32177734, 0)
+shape = SubResource("CapsuleShape3D_un3et")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=299220762]
+transform = Transform3D(0.86610544, 0, 0, 0, 1.1799874, 0, 0, 0, 1, 0, 0.28403473, 0)
+texture = ExtResource("1_pvrm2")
+
+[node name="AimPivot" type="Node3D" parent="." unique_id=2043554571]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28591418, 0)
+
+[node name="Weapon" parent="AimPivot" unique_id=1486592218 instance=ExtResource("3_7rpi8")]
