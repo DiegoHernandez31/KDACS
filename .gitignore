@@ -1,0 +1,21 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Ignorar exportaciones y builds (asegúrate de crear estas carpetas si exportan el juego)
+/exports/
+/builds/
+/bin/
+
+# Archivos del sistema operativo
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# IDEs (si usan VSCode, Visual Studio, etc.)
+.vscode/
+.idea/
+*.sln
+*.csproj
