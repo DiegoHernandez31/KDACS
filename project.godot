@@ -21,6 +21,10 @@ config/icon="uid://3ui60dybt1ql"
 
 RhythmManager="*uid://bisknxg7v0x2n"
 
+[autoload]
+
+RhythmManager="*uid://bisknxg7v0x2n"
+
 [display]
 
 window/size/mode=3
